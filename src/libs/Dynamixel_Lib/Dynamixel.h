@@ -10,12 +10,16 @@ private:
     int8_t directionPIN;
     void clearSerialBuffer();
     //initialize the ReturnPacket with dynamic array size
+    unsigned char ReturnPacket[20];
 
-    static const int returnArrSIZE = 20;
-    unsigned char ReturnPacket[returnArrSIZE] = {0};
-    unsigned char ReturnArr[];
+    struct 
+    {
+        unsigned char a,b,c,d,e,f;
+    }modtaget;
+
+    
     void sendPacket(unsigned char *arr, int arrSIZE);
-    unsigned char * readPacket();
+    //void readPacket();
 
 
 public:
@@ -23,11 +27,12 @@ public:
  //   virtual ~Dynamixel();
 
     void begin(HardwareSerial &Serial, uint32_t baudRate, int8_t directionPINOUT);
-    unsigned char ping(unsigned char MOTOR_ID);
+    void ping(unsigned char MOTOR_ID);
     void getPosition(unsigned char MOTOR_ID);
     void enableTorque(unsigned char MOTOR_ID, unsigned char setVal);
     void setPosition(unsigned char MOTOR_ID, unsigned short setVal);
     void operationMode(unsigned char MOTOR_ID, unsigned short setVal);
+    unsigned char readPacket();
 
 
 

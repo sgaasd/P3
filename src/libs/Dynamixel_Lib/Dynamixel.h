@@ -27,6 +27,7 @@ public:
     void getPosition(unsigned char MOTOR_ID);
     void enableTorque(unsigned char MOTOR_ID, unsigned char setVal);
     void setPosition(unsigned char MOTOR_ID, unsigned short setVal);
+    void operationMode(unsigned char MOTOR_ID, unsigned short setVal);
 
 
 

@@ -51,6 +51,27 @@ void Dynamixelclass::getPosition(unsigned char MOTOR_ID){
     p = readPacket();
 }
 
+void Dynamixelclass::operationMode(unsigned char MOTOR_ID, unsigned short setVal){
+   unsigned char Operator[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, 0x03, 0x0B, 0x00, setVal, 0, 0};
+    unsigned short len = sizeof(Operator)-2;
+    unsigned short crc = update_crc(Operator, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Operator[11]=CRC_L;
+    Operator[12]=CRC_H;
+
+    sendPacket(Operator, sizeof(Operator));
+
+    //0= Current Control Mode
+    //1= velocity Control Mode
+    //3= Position Control Mode (default)
+    //4= Extended Position Control Mode
+    //5= Current based posistion Control Mode
+    //16= PWM control Control Mode
+
+}
+
 void Dynamixelclass::enableTorque(unsigned char MOTOR_ID, unsigned char setVal){
     unsigned char torqueArr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, 0x03, 0x40, 0x00, setVal, 0, 0};
     unsigned short len = sizeof(torqueArr)-2;
@@ -63,6 +84,10 @@ void Dynamixelclass::enableTorque(unsigned char MOTOR_ID, unsigned char setVal){
 
     sendPacket(torqueArr, sizeof(torqueArr));
 }
+
+
+
+
 
 void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal){
     unsigned short val = setVal;

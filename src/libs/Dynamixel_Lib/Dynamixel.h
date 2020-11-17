@@ -15,7 +15,7 @@ private:
     unsigned char ReturnPacket[returnArrSIZE] = {0};
     unsigned char ReturnArr[];
     void sendPacket(unsigned char *arr, int arrSIZE);
-    void * readPacket();
+    unsigned char * readPacket();
 
 
 public:
@@ -23,8 +23,9 @@ public:
  //   virtual ~Dynamixel();
 
     void begin(HardwareSerial &Serial, uint32_t baudRate, int8_t directionPINOUT);
-    void ping(unsigned char MOTOR_ID);
-//    void getPosition();
+    unsigned char ping(unsigned char MOTOR_ID);
+    void getPosition(unsigned char MOTOR_ID);
+    void enableTorque(unsigned char MOTOR_ID, unsigned char setVal);
 
 
 

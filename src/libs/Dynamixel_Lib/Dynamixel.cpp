@@ -13,12 +13,14 @@ void Dynamixelclass::clearSerialBuffer(){
     }
 }
 
-void Dynamixelclass::ping(unsigned char MOTOR_ID){
+unsigned char Dynamixelclass::ping(unsigned char MOTOR_ID){
     unsigned char pingArr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x01, 0, 0};
     unsigned short len = sizeof(pingArr)-2;
     unsigned short crc = update_crc(pingArr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
+    bool check = false;
+    
 
     pingArr[8]=CRC_L;
     pingArr[9]=CRC_H;
@@ -26,6 +28,40 @@ void Dynamixelclass::ping(unsigned char MOTOR_ID){
     sendPacket(pingArr, sizeof(pingArr));
     unsigned char *p;
     p = readPacket();
+
+    if (p[4] == MOTOR_ID)
+    {
+        check = true;
+    }
+    return pingArr[8];
+}
+
+void Dynamixelclass::getPosition(unsigned char MOTOR_ID){
+    unsigned char getPosArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x84, 0x00, 0x04, 0x00, 0, 0};
+    unsigned short len = sizeof(getPosArr)-2;
+    unsigned short crc = update_crc(getPosArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    getPosArr[12]=CRC_L;
+    getPosArr[13]=CRC_H;
+
+    sendPacket(getPosArr, sizeof(getPosArr));
+    unsigned char *p;
+    p = readPacket();
+}
+
+void Dynamixelclass::enableTorque(unsigned char MOTOR_ID, unsigned char setVal){
+    unsigned char torqueArr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, 0x03, 0x40, 0x00, setVal, 0, 0};
+    unsigned short len = sizeof(torqueArr)-2;
+    unsigned short crc = update_crc(torqueArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    torqueArr[11]=CRC_L;
+    torqueArr[12]=CRC_H;
+
+    sendPacket(torqueArr, sizeof(torqueArr));
 }
 
  void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
@@ -34,11 +70,11 @@ void Dynamixelclass::ping(unsigned char MOTOR_ID){
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
     clearSerialBuffer();
-    delayMicroseconds(500); 
+    digitalWrite(directionPIN, LOW);
 }
 
-void * Dynamixelclass::readPacket(){
-
+unsigned char * Dynamixelclass::readPacket(){
+    delayMicroseconds(500); 
     unsigned char incomingbyte;
     int len = 0;
     if (DynamixelSerial->available()) {

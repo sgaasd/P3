@@ -14,6 +14,7 @@ void setup() {
   xbee.begin(Serial1, 115200);
   Dynamix.begin(Serial2, 57600, 3);
   Dynamix.ping(01);
+  
   }
 
   
@@ -23,7 +24,12 @@ void loop() {
     while(!Serial1){}
     while(!Serial){}
 
-  timer.update();
-  Serial.println(xbee.getEMG_CH1());
-  delay(25);
+  //timer.update();
+  //Serial.println(xbee.getEMG_CH1());
+  //delay(25);
+  Dynamix.enableTorque(254, 01);
+  delay(2000);
+  Dynamix.enableTorque(254, 00);
+  delay(2000);
+  Serial.println(Dynamix.ping(04));
 }

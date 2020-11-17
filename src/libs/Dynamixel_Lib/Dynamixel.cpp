@@ -6,7 +6,7 @@ void Dynamixel::begin(HardwareSerial &Serial, uint32_t baudRate, int8_t directio
     directionPIN = directionPINOUT;
     pinMode(directionPIN, OUTPUT);
 
-}
+} 
 
 void Dynamixel::clearSerialBuffer(){
     while(DynamixelSerial->available()>0){

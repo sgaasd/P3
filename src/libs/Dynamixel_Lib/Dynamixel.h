@@ -1,7 +1,7 @@
 #pragma once
 #include "arduino.h"
 
-
+ 
 class Dynamixel
 {
 private:

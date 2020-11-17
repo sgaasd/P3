@@ -26,7 +26,7 @@ public:
     unsigned char ping(unsigned char MOTOR_ID);
     void getPosition(unsigned char MOTOR_ID);
     void enableTorque(unsigned char MOTOR_ID, unsigned char setVal);
-    void SetPosition(unsigned char MOTOR_ID, unsigned short setVal);
+    void setPosition(unsigned char MOTOR_ID, unsigned short setVal);
 
 
 

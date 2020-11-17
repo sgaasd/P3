@@ -2,7 +2,7 @@
 #include "arduino.h"
 
  
-class Dynamixel
+class Dynamixelclass
 {
 private:
     HardwareSerial *DynamixelSerial;
@@ -12,18 +12,19 @@ private:
     //initialize the ReturnPacket with dynamic array size
 
     static const int returnArrSIZE = 20;
-    byte ReturnPacket[returnArrSIZE] = {0};
-    void sendPacket();
-    void readPacket();
+    unsigned char ReturnPacket[returnArrSIZE] = {0};
+    unsigned char ReturnArr[];
+    void sendPacket(unsigned char *arr, int arrSIZE);
+    void * readPacket();
 
 
 public:
    // Dynamixel(/* args */);
-    ~Dynamixel();
+ //   virtual ~Dynamixel();
 
     void begin(HardwareSerial &Serial, uint32_t baudRate, int8_t directionPINOUT);
-    bool ping(byte MOTOR_ID);
-    void getPosition();
+    void ping(unsigned char MOTOR_ID);
+//    void getPosition();
 
 
 
@@ -33,6 +34,6 @@ public:
 //{
 //}
 //Destructor
-Dynamixel::~Dynamixel()
-{
-}
+//Dynamixel::~Dynamixel()
+//{
+//}

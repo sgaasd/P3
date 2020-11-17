@@ -1,23 +1,22 @@
 #include "Dynamixel.h"
 
-void Dynamixel::begin(HardwareSerial &Serial, uint32_t baudRate, int8_t directionPINOUT){
+void Dynamixelclass::begin(HardwareSerial &Serial, uint32_t baudRate, int8_t directionPINOUT){
     DynamixelSerial = &Serial;
     DynamixelSerial->begin(baudRate);
     directionPIN = directionPINOUT;
     pinMode(directionPIN, OUTPUT);
-
 } 
 
-void Dynamixel::clearSerialBuffer(){
+void Dynamixelclass::clearSerialBuffer(){
     while(DynamixelSerial->available()>0){
     DynamixelSerial->read();
     }
 }
 
-bool Dynamixel::ping(byte MOTOR_ID){
-    int16_t pingArr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x01, 0, 0};
-
-    unsigned short crc = update_crc(pingArr, sizeof(pingArr)-2); // MInus two, because the the CRC_L and CRC_H are not included
+void Dynamixelclass::ping(unsigned char MOTOR_ID){
+    unsigned char pingArr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x01, 0, 0};
+    unsigned short len = sizeof(pingArr)-2;
+    unsigned short crc = update_crc(pingArr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
@@ -25,11 +24,11 @@ bool Dynamixel::ping(byte MOTOR_ID){
     pingArr[9]=CRC_H;
 
     sendPacket(pingArr, sizeof(pingArr));
-    byte *p;
+    unsigned char *p;
     p = readPacket();
 }
 
- void Dynamixel::sendPacket(int16_t *arr, int8_t arrSIZE){
+ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     digitalWrite(directionPIN, HIGH);
     delay(50);
     DynamixelSerial->write(arr, arrSIZE);
@@ -38,9 +37,9 @@ bool Dynamixel::ping(byte MOTOR_ID){
     delayMicroseconds(500); 
 }
 
-void Dynamixel::readPacket(){
+void * Dynamixelclass::readPacket(){
 
-    byte incomingbyte;
+    unsigned char incomingbyte;
     int len = 0;
     if (DynamixelSerial->available()) {
     // read the incoming byte:
@@ -60,17 +59,17 @@ void Dynamixel::readPacket(){
                     ReturnPacket[i]=incomingbyte;          //Save data in ReturnPacket array
                 }
                 for (int i = 0; i < 7+len; i++){
-                    static byte ReturnArr[7+len];
+                    static const int returnSIZE = 7+len;
+                    ReturnArr[returnSIZE];
                     ReturnArr[i] = ReturnPacket[i];
                 }
-                
             }
         }
     }
     return ReturnArr;
 }
 
-unsigned short Dynamixel::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size)
+unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size)
   {
     unsigned short crc_accum = 0;
     unsigned short i, j;

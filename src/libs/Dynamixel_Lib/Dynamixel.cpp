@@ -64,6 +64,19 @@ void Dynamixelclass::enableTorque(unsigned char MOTOR_ID, unsigned char setVal){
     sendPacket(torqueArr, sizeof(torqueArr));
 }
 
+void Dynamixelclass::SetPosistion(unsigned char MOTOR_ID, unsigned char setVal){
+    unsigned char Posistion[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, 0x03, 0x74, 0x00, setVal, 0, 0,0,0};
+    unsigned short len = sizeof(Posistion)-2;
+    unsigned short crc = update_crc(Posistion, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    torqueArr[14]=CRC_L;
+    torqueArr[15]=CRC_H;
+
+    sendPacket(Posistion, sizeof(Posistion));
+}
+
  void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     digitalWrite(directionPIN, HIGH);
     delay(50);

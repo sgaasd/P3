@@ -17,7 +17,7 @@ void setup() {
   //Serial2.begin(57600);
   //Dynamix.begin1(Serial, 57600);
   //Dynamix.ping(01);
-  Dynamix.enableTorque(254, 1);
+  Dynamix.setEnableTorque(254, 1);
   }
 
   

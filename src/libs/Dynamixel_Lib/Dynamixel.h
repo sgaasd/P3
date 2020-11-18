@@ -9,17 +9,10 @@ private:
     unsigned short update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size);
     int8_t directionPIN;
     void clearSerialBuffer();
-    //initialize the ReturnPacket with dynamic array size
-    //unsigned char ReturnPacket[20];
-
-    struct 
-    {
-        unsigned char a,b,c,d,e,f;
-    }modtaget;
-
+    sendPacket(unsigned char *arr, int arrSIZE);
+    unsigned char ReturnPacket[20];
+    unsigned char* sendNreadPacket(unsigned char *arr, int arrSIZE);
     
-    unsigned char sendNreadPacket(unsigned char *arr, int arrSIZE);
-    //void readPacket();
 
 
 public:
@@ -32,7 +25,7 @@ public:
     void enableTorque(unsigned char MOTOR_ID, unsigned char setVal);
     void setPosition(unsigned char MOTOR_ID, unsigned short setVal);
     void operationMode(unsigned char MOTOR_ID, unsigned short setVal);
-    unsigned char readPacket();
+    
 
 
 

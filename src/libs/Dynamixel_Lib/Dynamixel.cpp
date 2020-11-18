@@ -24,11 +24,10 @@ unsigned char Dynamixelclass::ping(unsigned char MOTOR_ID){
     pingArr[8]=CRC_L;
     pingArr[9]=CRC_H;
 
-    unsigned char a = sendNreadPacket(pingArr, sizeof(pingArr));
-    //readPacket();
-    //unsigned char value = ReturnPacket[0];
-   
-    return a;
+    unsigned char *rArr;
+    rArr = sendNreadPacket(pingArr, sizeof(pingArr));
+    unsigned char value = rArr[8];
+    return value;  // return value equal to error, if any error occurs.
 }
 
 void Dynamixelclass::getPosition(unsigned char MOTOR_ID){
@@ -101,9 +100,23 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal){
 
     sendNreadPacket(positionArr, sizeof(positionArr));
 }
+void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
+    
+    unsigned char incomingbyte;
+    unsigned char len = 0;
+    modtaget.a = 0;
 
- unsigned char Dynamixelclass::sendNreadPacket(unsigned char *arr, int arrSIZE){
-    unsigned char ReturnPacket[20];
+    digitalWrite(directionPIN, HIGH);
+    delay(50);
+    DynamixelSerial->write(arr, arrSIZE);
+    DynamixelSerial->flush();
+    //clearSerialBuffer();
+    delayMicroseconds(500);
+    digitalWrite(directionPIN, LOW);
+}
+
+ unsigned char* Dynamixelclass::sendNreadPacket(unsigned char *arr, int arrSIZE){
+    
     unsigned char incomingbyte;
     unsigned char len = 0;
     modtaget.a = 0;
@@ -142,7 +155,7 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal){
         }
     }
     modtaget.a =  ReturnPacket[7];
-   return modtaget.a; 
+   return ReturnPacket; 
 }
 /*
 unsigned char Dynamixelclass::readPacket(){

@@ -17,7 +17,7 @@ void setup() {
   //Serial2.begin(57600);
   //Dynamix.begin1(Serial, 57600);
   //Dynamix.ping(01);
-  Dynamix.setEnableTorque(254, 1);
+//  Dynamix.setEnableTorque(254, 1);
   }
 
   
@@ -31,13 +31,20 @@ void loop() {
   //Serial.println(xbee.getEMG_CH1());
   //delay(25);
   
-  delay(500);
+  delay(1000);
   //Dynamix.setPosition(01, 3000);
 //  Dynamix.ping(01);
 
-int test=Dynamix.getPMW(01);
-  Serial.println(test);
-  delay(500);
+
+Dynamix.setEnableTorque(1,1,04);
+Serial.print("sent");
+  delay(1000);
+
+Dynamix.setAction(1);
+
+  delay(1000);
+Dynamix.setEnableTorque(1,0,03);
+
   //Dynamix.setPosition(01, 2000);
   //delay(200);
   //Dynamix.ping(01);

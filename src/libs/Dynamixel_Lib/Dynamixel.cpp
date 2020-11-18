@@ -51,7 +51,6 @@ int32_t Dynamixelclass::getPosition(unsigned char MOTOR_ID){
     return result; 
 }
 
-
 int32_t Dynamixelclass::getVelocity(unsigned char MOTOR_ID){
   unsigned char getVelArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x80, 0x00, 0x02, 0x00, 0, 0};
     unsigned short len = sizeof(getVelArr)-2;
@@ -85,8 +84,6 @@ int32_t Dynamixelclass::getPMW(unsigned char MOTOR_ID){
 	int32_t result =(rArr[9] | rArr[10] << 8 );  //Bitwize or for 2 bit
     return result; 
 }
-
-
 
 /****************** Here are "set" functions ******************/
 /******************                          ******************/
@@ -145,17 +142,18 @@ void Dynamixelclass::setEnableTorque(unsigned char MOTOR_ID, unsigned char setVa
     sendPacket(torqueArr, sizeof(torqueArr));
 }
 
-void setAction(unsigned char MOTOR_ID){
+void Dynamixelclass::setAction(unsigned char MOTOR_ID){
     unsigned char actionArr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x05, 0, 0};
     unsigned short len = sizeof(actionArr)-2;
     unsigned short crc = update_crc(actionArr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    actionArr[14]=CRC_L;
-    actionArr[15]=CRC_H;
+    actionArr[8]=CRC_L;
+    actionArr[9]=CRC_H;
 
     sendPacket(actionArr, sizeof(actionArr));
+
 }
 
 /****************** Here are private functions ******************/
@@ -211,7 +209,6 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     }
    return ReturnPacket; 
 }
-
 
 unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size)
   {

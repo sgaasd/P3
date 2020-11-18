@@ -57,7 +57,7 @@ void Dynamixelclass::operationMode(unsigned char MOTOR_ID, unsigned short setVal
     Operator[11]=CRC_L;
     Operator[12]=CRC_H;
 
-    sendNreadPacket(Operator, sizeof(Operator));
+    sendPacket(Operator, sizeof(Operator));
 
     //0= Current Control Mode
     //1= velocity Control Mode
@@ -78,12 +78,8 @@ void Dynamixelclass::enableTorque(unsigned char MOTOR_ID, unsigned char setVal){
     torqueArr[11]=CRC_L;
     torqueArr[12]=CRC_H;
 
-    sendNreadPacket(torqueArr, sizeof(torqueArr));
+    sendPacket(torqueArr, sizeof(torqueArr));
 }
-
-
-
-
 
 void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal){
     unsigned short val = setVal;
@@ -101,8 +97,9 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal){
     positionArr[14]=CRC_L;
     positionArr[15]=CRC_H;
 
-    sendNreadPacket(positionArr, sizeof(positionArr));
+    sendPacket(positionArr, sizeof(positionArr));
 }
+
 void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     
     unsigned char incomingbyte;
@@ -122,7 +119,6 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     
     unsigned char incomingbyte;
     unsigned char len = 0;
-    modtaget.a = 0;
 
     digitalWrite(directionPIN, HIGH);
     delay(50);
@@ -149,49 +145,12 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
                     incomingbyte = DynamixelSerial->read();        //Save incomingbyte
                     ReturnPacket[i]=incomingbyte;          //Save data in ReturnPacket array
                 }
-               /* for (int i = 0; i < 7+len; i++){
-                    static const int returnSIZE = 7+len;
-                    ReturnArr[returnSIZE];
-                    ReturnArr[i] = ReturnPacket[i];
-                }*/
             }
         }
     }
-    modtaget.a =  ReturnPacket[7];
    return ReturnPacket; 
 }
-/*
-unsigned char Dynamixelclass::readPacket(){
-    unsigned char incomingbyte;
-    unsigned char len = 0;
-    if (DynamixelSerial->available()) {
-    // read the incoming byte:
-        if(DynamixelSerial->read() == 0xFF){
-            if(DynamixelSerial->read() == 0xFF && DynamixelSerial->peek() == 0xFD){    // check that there are  "0xFF" and "0xFD" header data
-                modtaget.a = 0xFF;
-                ReturnPacket[1] = 0xFF;
-                ReturnPacket[2] = DynamixelSerial->read(); //0xFD
-                ReturnPacket[3] = DynamixelSerial->read(); //0x00
-                ReturnPacket[4] = DynamixelSerial->read(); //MOTOR_ID
-                ReturnPacket[5] = DynamixelSerial->read(); //LEN_L
-                ReturnPacket[6] = DynamixelSerial->read(); //LEN_H
-                len = (ReturnPacket[6] << 8) + ReturnPacket[5]; // Lenght of remaining status packet
 
-                for(int i=7; i<7+len; i++){
-                    incomingbyte = DynamixelSerial->read();        //Save incomingbyte
-                    ReturnPacket[i]=incomingbyte;          //Save data in ReturnPacket array
-                }
-               /* for (int i = 0; i < 7+len; i++){
-                    static const int returnSIZE = 7+len;
-                    ReturnArr[returnSIZE];
-                    ReturnArr[i] = ReturnPacket[i];
-                }*/
-         //   }
-      //  }
-  //  }
-    //unsigned char value = ReturnPacket[4];
-   // return modtaget.a;
-// } */
 
 unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size)
   {

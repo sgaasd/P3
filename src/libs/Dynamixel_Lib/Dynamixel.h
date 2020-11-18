@@ -6,12 +6,16 @@ class Dynamixelclass
 {
 private:
     HardwareSerial *DynamixelSerial;
-    unsigned short update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size);
+    
     int8_t directionPIN;
-    void clearSerialBuffer();
-    sendPacket(unsigned char *arr, int arrSIZE);
     unsigned char ReturnPacket[20];
+
+    void clearSerialBuffer();
+    void sendPacket(unsigned char *arr, int arrSIZE);
     unsigned char* sendNreadPacket(unsigned char *arr, int arrSIZE);
+    unsigned short update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size);
+    
+    
     
 
 

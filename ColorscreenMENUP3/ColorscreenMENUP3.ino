@@ -1,4 +1,5 @@
-#include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
+//#include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
+#include "Elegoo_TFTLCD.h"
 //#include <Elegoo_GFX.h>
 
 //declaration of used analog pins on arduino

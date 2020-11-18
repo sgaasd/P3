@@ -30,11 +30,11 @@ public:
     void setPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setOperationMode(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setAction(unsigned char MOTOR_ID);
-    void setPMW(unsigned char MOTOR_ID, signed short setVal, unsigned char setIntruction);
+    void setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     
     int32_t getPosition(unsigned char MOTOR_ID);
     int32_t getVelocity(unsigned char MOTOR_ID);
-    int32_t getPMW(unsigned char MOTOR_ID);
+    int32_t getPWM(unsigned char MOTOR_ID);
 
     
 

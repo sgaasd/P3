@@ -68,7 +68,7 @@ int32_t Dynamixelclass::getVelocity(unsigned char MOTOR_ID){
     return result; 
 }
 
-int32_t Dynamixelclass::getPMW(unsigned char MOTOR_ID){
+int32_t Dynamixelclass::getPWM(unsigned char MOTOR_ID){
   unsigned char getPWMArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x7C, 0x00, 0x02, 0x00, 0, 0};
     unsigned short len = sizeof(getPWMArr)-2;
     unsigned short crc = update_crc(getPWMArr, len); // MInus two, because the the CRC_L and CRC_H are not included
@@ -108,8 +108,8 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal, 
     sendPacket(positionArr, sizeof(positionArr));
 }
 
-void Dynamixelclass::setPMW(unsigned char MOTOR_ID, signed short setVal, unsigned char setIntruction){
-    signed short val = setVal;
+void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
+    unsigned short val = setVal;
     unsigned char val_H = (val & 0x00FF);
     unsigned char val_L = (val>>8) & 0x00FF;
 

@@ -17,7 +17,7 @@ void setup() {
   //Serial2.begin(57600);
   //Dynamix.begin1(Serial, 57600);
   //Dynamix.ping(01);
-  Dynamix.enableTorque(254, 01);
+  Dynamix.enableTorque(254, 0);
   }
 
   
@@ -34,7 +34,9 @@ void loop() {
   delay(500);
   //Dynamix.setPosition(01, 3000);
 //  Dynamix.ping(01);
-  Serial.println(Dynamix.ping(01), HEX);
+
+int pos=Dynamix.getPosition(01);
+  Serial.println(pos);
   delay(500);
   //Dynamix.setPosition(01, 2000);
   //delay(200);

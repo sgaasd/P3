@@ -30,8 +30,8 @@ unsigned char Dynamixelclass::ping(unsigned char MOTOR_ID){
     return value;  // return value equal to error, if any error occurs.
 }
 
-void Dynamixelclass::getPosition(unsigned char MOTOR_ID){
-  unsigned char getPosArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x7E, 0x00, 0x04, 0x00, 0, 0};
+int32_t Dynamixelclass::getPosition(unsigned char MOTOR_ID){
+  unsigned char getPosArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x84, 0x00, 0x04, 0x00, 0, 0};
     unsigned short len = sizeof(getPosArr)-2;
     unsigned short crc = update_crc(getPosArr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
@@ -40,10 +40,10 @@ void Dynamixelclass::getPosition(unsigned char MOTOR_ID){
     getPosArr[12]=CRC_L;
     getPosArr[13]=CRC_H;
 
-    signed char *rArr;
+    unsigned char *rArr;
     rArr = sendNreadPacket(getPosArr, sizeof(getPosArr));
     //unsigned char value = rArr[15];  
-	uint32_t result =(rArr[9] | rArr[10] << 8 | rArr[11] << 16 | rArr[12] << 24);  //Bitwize or  
+	int32_t result =(rArr[9] | rArr[10] << 8 | rArr[11] << 16 | rArr[12] << 24);  //Bitwize or  
     return result; 
 }
 

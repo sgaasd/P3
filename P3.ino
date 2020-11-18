@@ -17,7 +17,7 @@ void setup() {
   //Serial2.begin(57600);
   //Dynamix.begin1(Serial, 57600);
   //Dynamix.ping(01);
-//  Dynamix.setEnableTorque(254, 1);
+ Dynamix.setEnableTorque(254, 1,03);
   }
 
   
@@ -37,17 +37,15 @@ void loop() {
 
   //delay(1000);
 
-Dynamix.setEnableTorque(1,1,04);
 Serial.println("sent\n");
   delay(1000);
 
-  Dynamix.setEnableTorque(1,1,04);
-
-
-Dynamix.setAction(1);
+  Dynamix.setPMW(4,400,04);
+  Dynamix.setPMW(5,-400,04);
+  Dynamix.setAction(0xFE);
 
   delay(1000);
-Dynamix.setEnableTorque(1,0,03);
+//Dynamix.setEnableTorque(1,0,03);
 
   //Dynamix.setPosition(01, 2000);
   //delay(200);

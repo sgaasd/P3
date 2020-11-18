@@ -30,6 +30,10 @@ unsigned char Dynamixelclass::ping(unsigned char MOTOR_ID){
     return value;  // return value equal to error, if any error occurs.
 }
 
+/****************** Here are "get" functions ******************/
+/******************                          ******************/
+/******************                          ******************/
+
 int32_t Dynamixelclass::getPosition(unsigned char MOTOR_ID){
   unsigned char getPosArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x84, 0x00, 0x04, 0x00, 0, 0};
     unsigned short len = sizeof(getPosArr)-2;
@@ -82,8 +86,33 @@ int32_t Dynamixelclass::getPMW(unsigned char MOTOR_ID){
     return result; 
 }
 
-void Dynamixelclass::operationMode(unsigned char MOTOR_ID, unsigned short setVal){
-   unsigned char Operator[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, 0x03, 0x0B, 0x00, setVal, 0, 0};
+
+
+/****************** Here are "set" functions ******************/
+/******************                          ******************/
+/******************                          ******************/
+
+void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
+    unsigned short val = setVal;
+    unsigned char val_LL = (val & 0x00FF);
+    unsigned char val_L = (val>>8) & 0x00FF;
+    unsigned char val_H = (val>>16) & 0x00FF;
+    unsigned char val_HH = (val>>24) & 0x00FF;
+
+    unsigned char positionArr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x74, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
+    unsigned short len = sizeof(positionArr)-2;
+    unsigned short crc = update_crc(positionArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    positionArr[14]=CRC_L;
+    positionArr[15]=CRC_H;
+
+    sendPacket(positionArr, sizeof(positionArr));
+}
+
+void Dynamixelclass::setOperationMode(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
+   unsigned char Operator[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x0B, 0x00, setVal, 0, 0};
     unsigned short len = sizeof(Operator)-2;
     unsigned short crc = update_crc(Operator, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
@@ -103,8 +132,8 @@ void Dynamixelclass::operationMode(unsigned char MOTOR_ID, unsigned short setVal
 
 }
 
-void Dynamixelclass::enableTorque(unsigned char MOTOR_ID, unsigned char setVal){
-    unsigned char torqueArr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, 0x03, 0x40, 0x00, setVal, 0, 0};
+void Dynamixelclass::setEnableTorque(unsigned char MOTOR_ID, unsigned char setVal, unsigned char setIntruction){
+    unsigned char torqueArr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x40, 0x00, setVal, 0, 0};
     unsigned short len = sizeof(torqueArr)-2;
     unsigned short crc = update_crc(torqueArr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
@@ -116,24 +145,22 @@ void Dynamixelclass::enableTorque(unsigned char MOTOR_ID, unsigned char setVal){
     sendPacket(torqueArr, sizeof(torqueArr));
 }
 
-void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal){
-    unsigned short val = setVal;
-    unsigned char val_LL = (val & 0x00FF);
-    unsigned char val_L = (val>>8) & 0x00FF;
-    unsigned char val_H = (val>>16) & 0x00FF;
-    unsigned char val_HH = (val>>24) & 0x00FF;
-
-    unsigned char positionArr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, 0x03, 0x74, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
-    unsigned short len = sizeof(positionArr)-2;
-    unsigned short crc = update_crc(positionArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+void setAction(unsigned char MOTOR_ID){
+    unsigned char actionArr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x05, 0, 0};
+    unsigned short len = sizeof(actionArr)-2;
+    unsigned short crc = update_crc(actionArr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    positionArr[14]=CRC_L;
-    positionArr[15]=CRC_H;
+    actionArr[14]=CRC_L;
+    actionArr[15]=CRC_H;
 
-    sendPacket(positionArr, sizeof(positionArr));
+    sendPacket(actionArr, sizeof(actionArr));
 }
+
+/****************** Here are private functions ******************/
+/******************                            ******************/
+/******************                            ******************/
 
 void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     

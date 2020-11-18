@@ -25,10 +25,14 @@ public:
 
     void begin(HardwareSerial &Serial, uint32_t baudRate, int8_t directionPINOUT);
     unsigned char ping(unsigned char MOTOR_ID);
-    int32_t getPosition(unsigned char MOTOR_ID);
     void enableTorque(unsigned char MOTOR_ID, unsigned char setVal);
     void setPosition(unsigned char MOTOR_ID, unsigned short setVal);
     void operationMode(unsigned char MOTOR_ID, unsigned short setVal);
+    
+    int32_t getPosition(unsigned char MOTOR_ID);
+    int32_t getVelocity(unsigned char MOTOR_ID);
+    int32_t getPMW(unsigned char MOTOR_ID);
+
     
 
 

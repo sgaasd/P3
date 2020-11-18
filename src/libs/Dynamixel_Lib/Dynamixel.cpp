@@ -104,7 +104,6 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     
     unsigned char incomingbyte;
     unsigned char len = 0;
-    modtaget.a = 0;
 
     digitalWrite(directionPIN, HIGH);
     delay(50);

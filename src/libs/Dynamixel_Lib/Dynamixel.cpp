@@ -120,8 +120,8 @@ void Dynamixelclass::setPMW(unsigned char MOTOR_ID, unsigned short setVal, unsig
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    PWMArr[13]=CRC_L;
-    PWMArr[14]=CRC_H;
+    PWMArr[12]=CRC_L;
+    PWMArr[13]=CRC_H;
 
     sendPacket(PWMArr, sizeof(PWMArr));
 }

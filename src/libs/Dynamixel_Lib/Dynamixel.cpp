@@ -108,8 +108,8 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal, 
     sendPacket(positionArr, sizeof(positionArr));
 }
 
-void Dynamixelclass::setPMW(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
-    unsigned short val = setVal;
+void Dynamixelclass::setPMW(unsigned char MOTOR_ID, signed short setVal, unsigned char setIntruction){
+    signed short val = setVal;
     unsigned char val_H = (val & 0x00FF);
     unsigned char val_L = (val>>8) & 0x00FF;
 

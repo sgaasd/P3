@@ -24,21 +24,25 @@ void setup() {
 //IntervalTimer timer(10, xBeeRead);
 
 void loop() {
-    while(!Serial1){}
-    while(!Serial){}
+    //while(!Serial1){}
+    //while(!Serial){}
 
   //timer.update();
   //Serial.println(xbee.getEMG_CH1());
   //delay(25);
   
-  delay(1000);
+  //delay(1000);
   //Dynamix.setPosition(01, 3000);
 //  Dynamix.ping(01);
 
+  //delay(1000);
 
 Dynamix.setEnableTorque(1,1,04);
-Serial.print("sent");
+Serial.println("sent\n");
   delay(1000);
+
+  Dynamix.setEnableTorque(1,1,04);
+
 
 Dynamix.setAction(1);
 

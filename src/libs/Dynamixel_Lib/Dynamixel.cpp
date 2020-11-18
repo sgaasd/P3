@@ -13,7 +13,7 @@ void Dynamixelclass::clearSerialBuffer(){
     }
 }
 
-void Dynamixelclass::ping(unsigned char MOTOR_ID){
+unsigned char Dynamixelclass::ping(unsigned char MOTOR_ID){
     unsigned char pingArr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x01, 0, 0};
     unsigned short len = sizeof(pingArr)-2;
     unsigned short crc = update_crc(pingArr, len); // MInus two, because the the CRC_L and CRC_H are not included
@@ -24,11 +24,11 @@ void Dynamixelclass::ping(unsigned char MOTOR_ID){
     pingArr[8]=CRC_L;
     pingArr[9]=CRC_H;
 
-    sendPacket(pingArr, sizeof(pingArr));
+    unsigned char a = sendNreadPacket(pingArr, sizeof(pingArr));
     //readPacket();
     //unsigned char value = ReturnPacket[0];
    
-    //return pingArr[9];
+    return a;
 }
 
 void Dynamixelclass::getPosition(unsigned char MOTOR_ID){
@@ -41,7 +41,7 @@ void Dynamixelclass::getPosition(unsigned char MOTOR_ID){
     getPosArr[12]=CRC_L;
     getPosArr[13]=CRC_H;
 
-    sendPacket(getPosArr, sizeof(getPosArr));
+    sendNreadPacket(getPosArr, sizeof(getPosArr));
     
 }
 
@@ -55,7 +55,7 @@ void Dynamixelclass::operationMode(unsigned char MOTOR_ID, unsigned short setVal
     Operator[11]=CRC_L;
     Operator[12]=CRC_H;
 
-    sendPacket(Operator, sizeof(Operator));
+    sendNreadPacket(Operator, sizeof(Operator));
 
     //0= Current Control Mode
     //1= velocity Control Mode
@@ -76,7 +76,7 @@ void Dynamixelclass::enableTorque(unsigned char MOTOR_ID, unsigned char setVal){
     torqueArr[11]=CRC_L;
     torqueArr[12]=CRC_H;
 
-    sendPacket(torqueArr, sizeof(torqueArr));
+    sendNreadPacket(torqueArr, sizeof(torqueArr));
 }
 
 
@@ -99,23 +99,53 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal){
     positionArr[14]=CRC_L;
     positionArr[15]=CRC_H;
 
-    sendPacket(positionArr, sizeof(positionArr));
+    sendNreadPacket(positionArr, sizeof(positionArr));
 }
 
- void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
+ unsigned char Dynamixelclass::sendNreadPacket(unsigned char *arr, int arrSIZE){
+    unsigned char ReturnPacket[20];
+    unsigned char incomingbyte;
+    unsigned char len = 0;
+    modtaget.a = 0;
+
     digitalWrite(directionPIN, HIGH);
     delay(50);
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
-    clearSerialBuffer();
+    //clearSerialBuffer();
     delayMicroseconds(500);
     digitalWrite(directionPIN, LOW);
-    readPacket();
-    
-}
 
+    if (DynamixelSerial->available()) {
+    // read the incoming byte:
+        if(DynamixelSerial->read() == 0xFF){
+            if(DynamixelSerial->read() == 0xFF && DynamixelSerial->peek() == 0xFD){    // check that there are  "0xFF" and "0xFD" header data
+                ReturnPacket[0] = 0xFF;
+                ReturnPacket[1] = 0xFF;
+                ReturnPacket[2] = DynamixelSerial->read(); //0xFD
+                ReturnPacket[3] = DynamixelSerial->read(); //0x00
+                ReturnPacket[4] = DynamixelSerial->read(); //MOTOR_ID
+                ReturnPacket[5] = DynamixelSerial->read(); //LEN_L
+                ReturnPacket[6] = DynamixelSerial->read(); //LEN_H
+                len = (ReturnPacket[6] << 8) + ReturnPacket[5]; // Lenght of remaining status packet
+
+                for(int i=7; i<7+(int)len; i++){
+                    incomingbyte = DynamixelSerial->read();        //Save incomingbyte
+                    ReturnPacket[i]=incomingbyte;          //Save data in ReturnPacket array
+                }
+               /* for (int i = 0; i < 7+len; i++){
+                    static const int returnSIZE = 7+len;
+                    ReturnArr[returnSIZE];
+                    ReturnArr[i] = ReturnPacket[i];
+                }*/
+            }
+        }
+    }
+    modtaget.a =  ReturnPacket[7];
+   return modtaget.a; 
+}
+/*
 unsigned char Dynamixelclass::readPacket(){
-    //unsigned char* ReturnPacket = new unsigned char[20];
     unsigned char incomingbyte;
     unsigned char len = 0;
     if (DynamixelSerial->available()) {
@@ -140,12 +170,12 @@ unsigned char Dynamixelclass::readPacket(){
                     ReturnArr[returnSIZE];
                     ReturnArr[i] = ReturnPacket[i];
                 }*/
-            }
-        }
-    }
+         //   }
+      //  }
+  //  }
     //unsigned char value = ReturnPacket[4];
-    return modtaget.a;
-}
+   // return modtaget.a;
+// } */
 
 unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size)
   {

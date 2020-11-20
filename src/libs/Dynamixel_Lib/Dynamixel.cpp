@@ -5,13 +5,8 @@ void Dynamixelclass::begin(HardwareSerial &Serial, uint32_t baudRate, int8_t dir
     DynamixelSerial->begin(baudRate);
     directionPIN = directionPINOUT;
     pinMode(directionPIN, OUTPUT);
+    delay(1000);
 } 
-
-void Dynamixelclass::clearSerialBuffer(){
-    while(DynamixelSerial->available()>0){
-    DynamixelSerial->read();
-    }
-}
 
 unsigned char Dynamixelclass::ping(unsigned char MOTOR_ID){
     unsigned char pingArr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x01, 0, 0};
@@ -35,52 +30,85 @@ unsigned char Dynamixelclass::ping(unsigned char MOTOR_ID){
 /******************                          ******************/
 
 int32_t Dynamixelclass::getPosition(unsigned char MOTOR_ID){
-  unsigned char getPosArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x84, 0x00, 0x04, 0x00, 0, 0};
-    unsigned short len = sizeof(getPosArr)-2;
-    unsigned short crc = update_crc(getPosArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    //clearSerialBuffer();
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x84, 0x00, 0x04, 0x00, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    getPosArr[12]=CRC_L;
-    getPosArr[13]=CRC_H;
+    Arr[12]=CRC_L;
+    Arr[13]=CRC_H;
 
     unsigned char *rArr;
-    rArr = sendNreadPacket(getPosArr, sizeof(getPosArr));
-    //unsigned char value = rArr[15];  
+    rArr = sendNreadPacket(Arr, sizeof(Arr)); 
 	int32_t result =(rArr[9] | rArr[10] << 8 | rArr[11] << 16 | rArr[12] << 24);  //Bitwize or for 4bit  
     return result; 
 }
 
 int32_t Dynamixelclass::getVelocity(unsigned char MOTOR_ID){
-  unsigned char getVelArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x80, 0x00, 0x02, 0x00, 0, 0};
-    unsigned short len = sizeof(getVelArr)-2;
-    unsigned short crc = update_crc(getVelArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    //clearSerialBuffer();
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x80, 0x00, 0x02, 0x00, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    getVelArr[12]=CRC_L;
-    getVelArr[13]=CRC_H;
+    Arr[12]=CRC_L;
+    Arr[13]=CRC_H;
 
     unsigned char *rArr;
-    rArr = sendNreadPacket(getVelArr, sizeof(getVelArr));
-    //unsigned char value = rArr[15];  
+    rArr = sendNreadPacket(Arr, sizeof(Arr));  
 	int32_t result =(rArr[9] | rArr[10] << 8 );  //Bitwize or for 2 bit
     return result; 
 }
 
 int32_t Dynamixelclass::getPWM(unsigned char MOTOR_ID){
-  unsigned char getPWMArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x7C, 0x00, 0x02, 0x00, 0, 0};
-    unsigned short len = sizeof(getPWMArr)-2;
-    unsigned short crc = update_crc(getPWMArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    //clearSerialBuffer();
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x7C, 0x00, 0x02, 0x00, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    getPWMArr[12]=CRC_L;
-    getPWMArr[13]=CRC_H;
+    Arr[12]=CRC_L;
+    Arr[13]=CRC_H;
 
     unsigned char *rArr;
-    rArr = sendNreadPacket(getPWMArr, sizeof(getPWMArr));
-    //unsigned char value = rArr[15];  
+    rArr = sendNreadPacket(Arr, sizeof(Arr));
+	int32_t result =(rArr[9] | rArr[10] << 8 );  //Bitwize or for 2 bit
+    return result; 
+}
+
+int32_t Dynamixelclass::getGain(unsigned char MOTOR_ID, char setControllerGain){
+    //clearSerialBuffer();
+    char controllerGain = 0x00;
+    switch (setControllerGain)
+    {
+    case 'p':
+        controllerGain = 0x54;
+        break;
+    case 'i':
+        controllerGain = 0x52;
+        break;
+    case 'd':
+        controllerGain = 0x50;
+        break;
+    default:
+        controllerGain = 0x00;
+        break;
+    }
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, controllerGain, 0x00, 0x02, 0x00, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[12]=CRC_L;
+    Arr[13]=CRC_H;
+
+    unsigned char *rArr;
+    rArr = sendNreadPacket(Arr, sizeof(Arr));  
 	int32_t result =(rArr[9] | rArr[10] << 8 );  //Bitwize or for 2 bit
     return result; 
 }
@@ -89,23 +117,63 @@ int32_t Dynamixelclass::getPWM(unsigned char MOTOR_ID){
 /******************                          ******************/
 /******************                          ******************/
 
-void Dynamixelclass::setPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
-    unsigned short val = setVal;
-    unsigned char val_LL = (val & 0x00FF);
-    unsigned char val_L = (val>>8) & 0x00FF;
-    unsigned char val_H = (val>>16) & 0x00FF;
-    unsigned char val_HH = (val>>24) & 0x00FF;
+void Dynamixelclass::setGain(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction, char setControllerGain){
+    char controllerGain = 0x00;
+    switch (setControllerGain)
+    {
+    case 'p':
+        controllerGain = 0x54;
+        break;
+    case 'i':
+        controllerGain = 0x52;
+        break;
+    case 'd':
+        controllerGain = 0x50;
+        break;
+    default:
+        controllerGain = 0x00;
+        break;
+    }
+    signed short val = setVal;
+    unsigned char val_L = (val & 0x00FF);
+    unsigned char val_H = (val>>8) & 0x00FF;
 
-    unsigned char positionArr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x74, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
-    unsigned short len = sizeof(positionArr)-2;
-    unsigned short crc = update_crc(positionArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, setIntruction, controllerGain, 0x00, val_L, val_H, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    positionArr[14]=CRC_L;
-    positionArr[15]=CRC_H;
+    Arr[12]=CRC_L;
+    Arr[13]=CRC_H;
 
-    sendPacket(positionArr, sizeof(positionArr));
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
+}
+
+void Dynamixelclass::setPosition(unsigned char MOTOR_ID, signed short setVal, unsigned char setIntruction){
+    signed short val = setVal;
+    val %= 4096;
+   // unsigned char val_LL = (val & 0x00FF);
+   // unsigned char val_L = (val>>8) & 0x00FF;
+   // unsigned char val_H = (val>>16) & 0x00FF;
+   // unsigned char val_HH = (val>>24) & 0x00FF;
+    unsigned char val_LL = (val & 0xFF);
+    unsigned char val_L =  (val & 0xFF00) >> 8;
+    unsigned char val_H =  (val & 0xFF0000) >> 16;
+    unsigned char val_HH =  (val & 0xFF000000) >> 24;
+
+    unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x74, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[14]=CRC_L;
+    Arr[15]=CRC_H;
+
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
 }
 
 void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
@@ -113,97 +181,161 @@ void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsig
     unsigned char val_H = (val & 0x00FF);
     unsigned char val_L = (val>>8) & 0x00FF;
 
-
-    unsigned char PWMArr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, setIntruction, 0x64, 0x00, val_L, val_H, 0, 0};
-    unsigned short len = sizeof(PWMArr)-2;
-    unsigned short crc = update_crc(PWMArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, setIntruction, 0x64, 0x00, val_L, val_H, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    PWMArr[12]=CRC_L;
-    PWMArr[13]=CRC_H;
+    Arr[12]=CRC_L;
+    Arr[13]=CRC_H;
 
-    sendPacket(PWMArr, sizeof(PWMArr));
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
 }
 
 void Dynamixelclass::setOperationMode(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
-   unsigned char Operator[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x0B, 0x00, setVal, 0, 0};
-    unsigned short len = sizeof(Operator)-2;
-    unsigned short crc = update_crc(Operator, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char Arr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x0B, 0x00, setVal, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    Operator[11]=CRC_L;
-    Operator[12]=CRC_H;
+    Arr[11]=CRC_L;
+    Arr[12]=CRC_H;
 
-    sendPacket(Operator, sizeof(Operator));
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
 
-    //0= Current Control Mode
-    //1= velocity Control Mode
-    //3= Position Control Mode (default)
-    //4= Extended Position Control Mode
-    //5= Current based posistion Control Mode
-    //16= PWM control Control Mode
-
+                //0= Current Control Mode
+                //1= velocity Control Mode
+                //3= Position Control Mode (default)
+                //4= Extended Position Control Mode
+                //5= Current based posistion Control Mode
+                //16= PWM control Control Mode
 }
 
-void Dynamixelclass::setEnableTorque(unsigned char MOTOR_ID, unsigned char setVal, unsigned char setIntruction){
-    unsigned char torqueArr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x40, 0x00, setVal, 0, 0};
-    unsigned short len = sizeof(torqueArr)-2;
-    unsigned short crc = update_crc(torqueArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+void Dynamixelclass::setAccelerationProfile(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
+   unsigned short val = setVal;
+    val %= 4096;
+    unsigned char val_LL = (val & 0xFF);
+    unsigned char val_L =  (val & 0xFF00) >> 8;
+    unsigned char val_H =  (val & 0xFF0000) >> 16;
+    unsigned char val_HH =  (val & 0xFF000000) >> 24;
+
+    unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x6C, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    torqueArr[11]=CRC_L;
-    torqueArr[12]=CRC_H;
+    Arr[14]=CRC_L;
+    Arr[15]=CRC_H;
 
-    sendPacket(torqueArr, sizeof(torqueArr));
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
+}
+
+void Dynamixelclass::setVelocityProfile(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
+    unsigned short val = setVal;
+    val %= 4096;
+    unsigned char val_LL = (val & 0xFF);
+    unsigned char val_L =  (val & 0xFF00) >> 8;
+    unsigned char val_H =  (val & 0xFF0000) >> 16;
+    unsigned char val_HH =  (val & 0xFF000000) >> 24;
+
+    unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x70, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[14]=CRC_L;
+    Arr[15]=CRC_H;
+
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
+}
+void Dynamixelclass::setEnableTorque(unsigned char MOTOR_ID, unsigned char setVal, unsigned char setIntruction){
+    unsigned char Arr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x40, 0x00, setVal, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[11]=CRC_L;
+    Arr[12]=CRC_H;
+
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
 }
 
 void Dynamixelclass::setAction(unsigned char MOTOR_ID){
-    unsigned char actionArr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x05, 0, 0};
-    unsigned short len = sizeof(actionArr)-2;
-    unsigned short crc = update_crc(actionArr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char Arr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x05, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
-    actionArr[8]=CRC_L;
-    actionArr[9]=CRC_H;
+    Arr[8]=CRC_L;
+    Arr[9]=CRC_H;
 
-    sendPacket(actionArr, sizeof(actionArr));
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
+}
 
+void Dynamixelclass::setStatusReturnLevel(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
+    unsigned char Arr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x44, 0x00, setVal, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[11]=CRC_L;
+    Arr[12]=CRC_H;
+
+    //clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
+
+            /*
+            setVal = 0x00 -> Returns PING Instuction only
+            setVal = 0x01 -> Returns PING and READ Instuctions only
+            setVal = 0x02 -> Returns all Instructions
+            */
 }
 
 /****************** Here are private functions ******************/
 /******************                            ******************/
 /******************                            ******************/
 
-void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
-    
-    unsigned char incomingbyte;
-    unsigned char len = 0;
+void Dynamixelclass::clearSerialBuffer(void){
+    while (DynamixelSerial->read() != -1);  // Clear RX buffer;
+}
 
+void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     digitalWrite(directionPIN, HIGH);
-    delay(50);
+    //delayMicroseconds(500);
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
-    //clearSerialBuffer();
-    delayMicroseconds(500);
+    noInterrupts();
+    //delayMicroseconds(500);
     digitalWrite(directionPIN, LOW);
+    interrupts();
+    delay(20);
 }
 
  unsigned char* Dynamixelclass::sendNreadPacket(unsigned char *arr, int arrSIZE){
     
     unsigned char incomingbyte;
     unsigned char len = 0;
-
     digitalWrite(directionPIN, HIGH);
-    delay(50);
+    delayMicroseconds(500);
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
-    //clearSerialBuffer();
+    noInterrupts();
     delayMicroseconds(500);
     digitalWrite(directionPIN, LOW);
+    interrupts();
 
     if (DynamixelSerial->available()) {
     // read the incoming byte:
@@ -225,11 +357,10 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
             }
         }
     }
-   return ReturnPacket; 
+    return ReturnPacket; 
 }
 
-unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size)
-  {
+unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size){
     unsigned short crc_accum = 0;
     unsigned short i, j;
     unsigned short crc_table[256] = {

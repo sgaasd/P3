@@ -27,14 +27,19 @@ public:
     unsigned char ping(unsigned char MOTOR_ID);
 
     void setEnableTorque(unsigned char MOTOR_ID, unsigned char setVal, unsigned char setIntruction);
-    void setPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
+    void setPosition(unsigned char MOTOR_ID, signed short setVal, unsigned char setIntruction);
     void setOperationMode(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setAction(unsigned char MOTOR_ID);
     void setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
+    void setGain(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction, char setControllerGain);
+    void setAccelerationProfile(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
+    void setVelocityProfile(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
+    void setStatusReturnLevel(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     
     int32_t getPosition(unsigned char MOTOR_ID);
     int32_t getVelocity(unsigned char MOTOR_ID);
     int32_t getPWM(unsigned char MOTOR_ID);
+    int32_t getGain(unsigned char MOTOR_ID, char setControllerGain);
 
     
 

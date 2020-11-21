@@ -12,21 +12,10 @@ void xBeeRead() {
   xbee.updateData();
 }
 bool ref = true;
-short value = 0;
-short Lastvalue = 0;
-short realValue;
+float value = 0;
+float Lastvalue = 0;
+float realValue;
 
-void getPOS() {
-  value = Dynamix.getPosition(02);
-  delay(2);
-  while(digitalRead(31) == true){
-    Serial.println("aktiv");
-    Serial.println(value);
-    Dynamix.setPosition(02, value + 200, 03);
-    delay(1000);
-Dynamix.getPosition(02);
-  }
-}
 
 
 void setup() {
@@ -35,12 +24,20 @@ void setup() {
   xbee.begin(Serial1, 115200);
   Dynamix.begin(Serial2, 57600, 3);
   delay(1000);
-  Dynamix.setEnableTorque(02, 01, 03);
-  Dynamix.setAccelerationProfile(02, 600, 03);
-  Dynamix.setVelocityProfile(02, 100, 03);
+  Dynamix.setStatusReturnLevel(02, 01, 03);
+  Dynamix.setMaxPosition(02, 3600, 03);
+  Dynamix.setMinPosition(02, 1000, 03);
+  
+ Dynamix.setEnableTorque(02, 01, 03);
+  Dynamix.setGain(02, 200, 03, 'p');
+  Dynamix.setGain(02, 20, 03, 'i');
+  Dynamix.setGain(02, 20, 03, 'd');
+  Dynamix.setAccelerationProfile(02, 100, 03);
+  Dynamix.setVelocityProfile(02, 50, 03);
+
+
 }
 
-IntervalTimer timer(1, getPOS);
 
 void startup() {
   for (int i = 0; i < 10; i++) {
@@ -48,33 +45,38 @@ void startup() {
     delay(10);
   }
 }
-
+bool moving= false;
 void loop() {
   while (!Serial2) {}
   startup();
-  timer.update();
-  delay(10);
-  
-  
-  
-  
+  value = Dynamix.getPosition(02);
+ //Serial.println(value);
+
+    realValue = value + 100;
+
+
+    delay(2);
+    Dynamix.setPosition(02, 3000, 03); 
+    delay(1);
+    Serial.println("reg_write1");
+    delay(1000);
+    Dynamix.setAction(02);
+    delay(1);
+    moving = Dynamix.getMoving(02);
+    while(moving==true){
+      moving = Dynamix.getMoving(02);
+      delay(2);
+      Serial.println("moving1");}
+      
+    delay(2);
+    Dynamix.setPosition(02, 1000, 03); 
+    delay(1);
+    Serial.println("reg_write2");
+    delay(1000);
+    Dynamix.setAction(02);
+    delay(1);
+   while(moving==true){
+      moving = Dynamix.getMoving(02);
+      delay(2);
+      Serial.println("moving2");}
 }
-
-
-
-//
-//  Serial.println(value);
-//  delay(2);
-//  if(ref == true){
-//    for(int i=0; i<100; i++){
-//      realValue = value + i + 10;
-//      Dynamix.setPosition(02, realValue, 03);
-//      delay(1);
-//      ref = false;
-//      }
-//    }
-//  else if(ref == false){
-//  realValue = value - 1000;
-//  Dynamix.setPosition(02, realValue, 03);
-//  delay(1);
-//  ref = true;}

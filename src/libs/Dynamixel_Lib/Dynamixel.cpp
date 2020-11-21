@@ -25,6 +25,11 @@ unsigned char Dynamixelclass::ping(unsigned char MOTOR_ID){
     return value;  // return value equal to error, if any error occurs.
 }
 
+short Dynamixelclass::degreesToBits(float degrees) {
+
+	return short(degrees * 4096 / 360);
+}
+
 /****************** Here are "get" functions ******************/
 /******************                          ******************/
 /******************                          ******************/
@@ -44,6 +49,13 @@ int32_t Dynamixelclass::getPosition(unsigned char MOTOR_ID){
     rArr = sendNreadPacket(Arr, sizeof(Arr)); 
 	int32_t result =(rArr[9] | rArr[10] << 8 | rArr[11] << 16 | rArr[12] << 24);  //Bitwize or for 4bit  
     return result; 
+}
+
+float Dynamixelclass::getPositionDegree(unsigned char MOTOR_ID){
+    //Converting from raw data to degrees (360/4095)
+    float posd;
+  posd = (float)getPosition(MOTOR_ID)*0.088;
+  return posd;
 }
 
 int32_t Dynamixelclass::getVelocity(unsigned char MOTOR_ID){
@@ -113,6 +125,40 @@ int32_t Dynamixelclass::getGain(unsigned char MOTOR_ID, char setControllerGain){
     return result; 
 }
 
+int32_t  Dynamixelclass::getMovingstatus(unsigned char MOTOR_ID){
+    //clearSerialBuffer();
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x7B, 0x00, 0x02, 0x00, 0, 0}; // der mangler lige at blive tjekke om det her er korrekt
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[12]=CRC_L;
+    Arr[13]=CRC_H;
+
+    unsigned char *rArr;
+    rArr = sendNreadPacket(Arr, sizeof(Arr));
+	int32_t result =(rArr[9] | rArr[10] << 8 );  //Bitwize or for 2 bit
+    return result; 
+}
+
+bool Dynamixelclass::getMoving(unsigned char MOTOR_ID){
+    //clearSerialBuffer();
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x7A, 0x00, 0x01, 0x00, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[12]=CRC_L;
+    Arr[13]=CRC_H;
+
+    unsigned char *rArr;
+    rArr = sendNreadPacket(Arr, sizeof(Arr));
+	bool result =rArr[9];  //Bitwize or for 2 bit
+    return result; 
+}
+
 /****************** Here are "set" functions ******************/
 /******************                          ******************/
 /******************                          ******************/
@@ -147,7 +193,7 @@ void Dynamixelclass::setGain(unsigned char MOTOR_ID, unsigned short setVal, unsi
     Arr[12]=CRC_L;
     Arr[13]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
@@ -172,8 +218,14 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, signed short setVal, un
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer(); // Denne linje er mega vigtig for at sikre man kun læser vædierne én gang
     sendPacket(Arr, sizeof(Arr));
+}
+
+void Dynamixelclass::setPositionDegree(unsigned char MOTOR_ID, float setVal, unsigned char setIntruction){
+    //short value = (short)setVal / 0.088;
+    //short value = short(setVal * 4096 / 360);
+    setPosition(MOTOR_ID, short(setVal * 4096 / 360), setIntruction);
 }
 
 void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
@@ -190,7 +242,7 @@ void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsig
     Arr[12]=CRC_L;
     Arr[13]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
@@ -204,7 +256,7 @@ void Dynamixelclass::setOperationMode(unsigned char MOTOR_ID, unsigned short set
     Arr[11]=CRC_L;
     Arr[12]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 
                 //0= Current Control Mode
@@ -232,7 +284,7 @@ void Dynamixelclass::setAccelerationProfile(unsigned char MOTOR_ID, unsigned sho
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
@@ -253,7 +305,7 @@ void Dynamixelclass::setVelocityProfile(unsigned char MOTOR_ID, unsigned short s
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 void Dynamixelclass::setEnableTorque(unsigned char MOTOR_ID, unsigned char setVal, unsigned char setIntruction){
@@ -266,7 +318,7 @@ void Dynamixelclass::setEnableTorque(unsigned char MOTOR_ID, unsigned char setVa
     Arr[11]=CRC_L;
     Arr[12]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
@@ -280,7 +332,7 @@ void Dynamixelclass::setAction(unsigned char MOTOR_ID){
     Arr[8]=CRC_L;
     Arr[9]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
@@ -294,7 +346,7 @@ void Dynamixelclass::setStatusReturnLevel(unsigned char MOTOR_ID, unsigned short
     Arr[11]=CRC_L;
     Arr[12]=CRC_H;
 
-    //clearSerialBuffer();
+    clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 
             /*
@@ -302,6 +354,48 @@ void Dynamixelclass::setStatusReturnLevel(unsigned char MOTOR_ID, unsigned short
             setVal = 0x01 -> Returns PING and READ Instuctions only
             setVal = 0x02 -> Returns all Instructions
             */
+}
+
+void Dynamixelclass::setMaxPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
+    unsigned short val = setVal;
+    val %= 4096;
+    unsigned char val_LL = (val & 0xFF);
+    unsigned char val_L =  (val & 0xFF00) >> 8;
+    unsigned char val_H =  (val & 0xFF0000) >> 16;
+    unsigned char val_HH =  (val & 0xFF000000) >> 24;
+
+    unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x30, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[14]=CRC_L;
+    Arr[15]=CRC_H;
+
+    clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
+}
+
+void Dynamixelclass::setMinPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
+    unsigned short val = setVal;
+    val %= 4096;
+    unsigned char val_LL = (val & 0xFF);
+    unsigned char val_L =  (val & 0xFF00) >> 8;
+    unsigned char val_H =  (val & 0xFF0000) >> 16;
+    unsigned char val_HH =  (val & 0xFF000000) >> 24;
+
+    unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x34, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
+    unsigned short len = sizeof(Arr)-2;
+    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned char CRC_L = (crc & 0x00FF);
+    unsigned char CRC_H = (crc>>8) & 0x00FF;
+
+    Arr[14]=CRC_L;
+    Arr[15]=CRC_H;
+
+    clearSerialBuffer();
+    sendPacket(Arr, sizeof(Arr));
 }
 
 /****************** Here are private functions ******************/
@@ -312,13 +406,25 @@ void Dynamixelclass::clearSerialBuffer(void){
     while (DynamixelSerial->read() != -1);  // Clear RX buffer;
 }
 
+double Dynamixelclass::rad2deg(double rad){
+    double deg = 0;
+    rad * 180/pi;
+    return deg;
+ }
+
+double Dynamixelclass::deg2rad(double deg){
+    double rad = 0;
+    deg * pi / 180;
+    return rad;
+ }
+
 void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     digitalWrite(directionPIN, HIGH);
-    //delayMicroseconds(500);
+    delayMicroseconds(500);
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
     noInterrupts();
-    //delayMicroseconds(500);
+    delayMicroseconds(500);
     digitalWrite(directionPIN, LOW);
     interrupts();
     delay(20);
@@ -358,6 +464,66 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
         }
     }
     return ReturnPacket; 
+}
+
+double* Dynamixelclass::inverseKinematics(double x, double y, double z){
+    double L1 = 0.0528;
+    double L2 = 0.21988;
+    double L3 = 0.22368;
+
+    double Arr[3]; 
+
+    //Theta 1
+    double theta1a=((atan2(y,x))); 
+    double theta1b=theta1a+pi;
+    double theta1c = theta1a;
+    double theta1d = theta1b;
+    Arr[0] = theta1b;
+    
+    double r = sqrt((x*x)+(y*y));
+    double c = sqrt((z-L1)*(z-L1)+(r*r));
+    double a=atan2((z-L1),r);
+    double A=acos(((c*c)+(L2*L2)-(L3*L3))/(2*c*L2));
+    
+    //Theta 2
+    double theta2a = -(a+A);
+    double theta2b = +(a+A)-pi;
+    double theta2c = A-a;
+    double theta2d = a-A-pi;
+    Arr[1] = rad2deg(theta2b);
+    
+    //Theta 3
+    double theta3 = acos(((L3*L3)+(L2*L2)-(c*c))/(2*L3*L2));
+    double theta3a = pi-theta3;
+    double theta3b = -pi+theta3;
+    double theta3c = -pi+theta3;
+    double theta3d = pi-theta3; 
+    Arr[2] = rad2deg(theta3b);
+
+    return Arr;
+}
+
+double Dynamixelclass::atan2(double numerator, double denominator){
+    double value = 0;
+    if (numerator > 0){
+        value = atan(denominator / numerator);
+    }
+    if (numerator < 0 && denominator >= 0){
+        value = (atan(denominator / numerator)) + pi;
+    }
+    if (numerator < 0 && denominator < 0){
+        value = (atan(denominator / numerator)) - pi;
+    }
+    if (numerator == 0 && denominator > 0){
+        value = +pi/2;
+    }
+    if (numerator == 0 && denominator < 0){
+        value = -pi/2;
+    }
+    if (numerator == 0 && denominator == 0){
+        value = 0;
+    }
+    return value;
 }
 
 unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size){

@@ -1,7 +1,7 @@
 #include "src/libs/EMG_Lib/EMG.h"
 #include "src/libs/IntervalTimer/IntervalTimer.h"
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
-#include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
+#include "src/libs/EMG_menu/EMG_menu.h"
 
 EMGclass xbee;
 Dynamixelclass Dynamix;
@@ -15,7 +15,6 @@ bool ref = true;
 float value = 0;
 float Lastvalue = 0;
 float realValue;
-
 
 
 void setup() {

@@ -1,9 +1,6 @@
 #include <EMG_menu.h>
 #include <EMG.h>
 
-
-
-
 //Det er fordi jeg elskser alle farver...
 #define BLACK   0x0000
 #define BLUE    0x001F
@@ -24,7 +21,10 @@ EMGmenu menuClass;
   int menu = 0;
   int y = 0;    
   bool MainMenu = true;
-  bool PointState = false;
+  bool Point1State = false;
+  bool Point2State = false;
+  bool Point3State = false;
+  bool Point4State = false;
   int sensorMin = 1023; 
   int sensorMax = 0;
   int sensorValue = 0;
@@ -87,30 +87,30 @@ void execute() {
     case 0:
     if (MainMenu == false){
       
-      if(PointState == false){
-    menuClass.SetParam(RED,3,70,PointerY[y]);
-    menuClass.print(" Point 1 ",0);
-    PointState = true; 
+      if(Point1State == false){
+      menuClass.SetParam(RED,3,70,PointerY[y]);
+      menuClass.print(" Point 1 ",0);
+      PointState = true; 
       } 
-      else if(PointState == true){
-     menuClass.SetParam(GREEN,3,70,PointerY[y]);
-     menuClass.print(" Point 1 ",0);
-    PointState = false;
+      else if(Poin1tState == true){
+      menuClass.SetParam(GREEN,3,70,PointerY[y]);
+      menuClass.print(" Point 1 ",0);
+      PointState = false;
       }
     }
       break;
     case 1:
     if (MainMenu == false){
       
-      if(PointState == false){
-    menuClass.SetParam(RED,3,70,PointerY[y]);
-    menuClass.print(" Point 2 ",0);
-    PointState = true; 
+      if(Point2State == false){
+      menuClass.SetParam(RED,3,70,PointerY[y]);
+      menuClass.print(" Point 2 ",0);
+      PointState = true; 
       } 
-      else if(PointState == true){
-    menuClass.SetParam(GREEN,3,70,PointerY[y]);
-    menuClass.print(" Point 2 ",0);
-    PointState = false;
+      else if(Point2State == true){
+      menuClass.SetParam(GREEN,3,70,PointerY[y]);
+      menuClass.print(" Point 2 ",0);
+      PointState = false;
       }
     }
       break;
@@ -118,15 +118,15 @@ void execute() {
     case 2:
     if (MainMenu == false){
       
-      if(PointState == false){
-    menuClass.SetParam(RED,3,70,PointerY[y]);
-    menuClass.print(" Point 3 ",0);
-    PointState = true;
+      if(Point3State == false){
+      menuClass.SetParam(RED,3,70,PointerY[y]);
+      menuClass.print(" Point 3 ",0);
+      PointState = true;
       }
-      else if(PointState == true){
-    menuClass.SetParam(GREEN,3,70,PointerY[y])
-    menuClass.print(" Point 3 ",0);
-    PointState = false; 
+      else if(Point3State == true){
+      menuClass.SetParam(GREEN,3,70,PointerY[y])
+      menuClass.print(" Point 3 ",0);
+      PointState = false; 
       }
     }
       break;
@@ -134,15 +134,15 @@ void execute() {
     case 3:
     if (MainMenu == false){
       
-      if(PointState == false){
-    menuClass.SetParam(RED,3,70,PointerY[y]);
-    menuClass.print(" Point 4 ",0);
-    PointState = true; 
+      if(Point4State == false){
+      menuClass.SetParam(RED,3,70,PointerY[y]);
+      menuClass.print(" Point 4 ",0);
+      PointState = true; 
       } 
-      else if(PointState == true){
-    menuClass.SetParam(GREEN,3,70,printPointer[y]);
-    menuClass.print(" Point 4 ",0);
-    PointState = false;
+      else if(Point4State == true){
+      menuClass.SetParam(GREEN,3,70,printPointer[y]);
+      menuClass.print(" Point 4 ",0);
+      PointState = false;
       }
     }
       break;
@@ -185,10 +185,10 @@ void callibration(){
 void loop() {
   if (!digitalRead(downButton)){
     menu++;
-       y++;
-     if (menu>4){
-       menu=0;
-       y = 0;
+    y++;
+    if (menu>4){
+     menu=0;
+     y = 0;
     }
     updateMenu();
     delay(200);
@@ -196,7 +196,7 @@ void loop() {
   }
   if (!digitalRead(upButton)){
     menu--;
-      y--;
+    y--;
     if (menu<0){
       menu=4;
       y = 4;

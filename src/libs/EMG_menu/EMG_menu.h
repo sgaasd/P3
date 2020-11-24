@@ -1,6 +1,6 @@
 #pragma once
-#include <Elegoo_TFTLCD.h>
-#include <Elegoo_GFX.h>
+#include "Elegoo_TFTLCD/Elegoo_TFTLCD.h"
+
 
 //declaration of used analog pins on arduino
 
@@ -19,7 +19,7 @@ private:
  
     
 public:
-  /*  void PrintMainMenu();
+    void PrintMainMenu();
     void PrintSubMenu();
     void SetParam(int color, int size, int x, int y);
     void print(String text, int type);
@@ -28,6 +28,6 @@ public:
     void begin(int addr);
     void fillScreen(int color);
     void fillRect(int x,int y,int width,int height, int color);
-    */
+    
 };
 

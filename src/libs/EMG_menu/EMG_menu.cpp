@@ -11,7 +11,7 @@
 #define WHITE   0xFFFF
 
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
-/*
+
 //Print main menu
   void EMGmenu::PrintMainMenu(){
     tft.setTextColor(WHITE);  tft.setTextSize(3);
@@ -77,4 +77,4 @@ Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
   void EMGmenu::fillRect(int x,int y,int width,int height, int color){
     tft.fillRect(x,y,width,height,color);
   }
-  */
+  

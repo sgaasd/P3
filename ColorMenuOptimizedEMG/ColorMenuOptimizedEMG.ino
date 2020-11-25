@@ -80,8 +80,8 @@ void setup() {
     printPointer();
     
     break;
+    }
   }
-}
 void execute() {
   switch (menu) {
     case 0:

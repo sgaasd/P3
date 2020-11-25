@@ -24,10 +24,10 @@ public:
     void SetParam(int color, int size, int x, int y);
     void print(String text, int type);
     void print(int value, int type);
-    void reset(void);
+    void reset();
     void begin(int addr);
     void fillScreen(int color);
     void fillRect(int x,int y,int width,int height, int color);
-    
+    void printPointer();
 };
 

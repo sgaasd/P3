@@ -3,6 +3,11 @@
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
 #include "src/libs/EMG_menu/EMG_menu.h"
 
+#define LCD_CS A3
+#define LCD_CD A2
+#define LCD_WR A1
+#define LCD_RD A0
+#define LCD_RESET A4
 //Det er fordi jeg elskser alle farver...
 #define BLACK   0x0000
 #define BLUE    0x001F
@@ -16,8 +21,8 @@
 
 EMGclass xbee;
 Dynamixelclass Dynamix;
-EMGmenu menuClass;
-
+//EMGmenu menuClass;
+Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 bool start = false;
 void xBeeRead() {
@@ -56,25 +61,30 @@ void setup() {
   Dynamix.setMaxPosition(02, 3600, 03);
   Dynamix.setMinPosition(02, 1000, 03);
   
- Dynamix.setEnableTorque(02, 01, 03);
+  Dynamix.setEnableTorque(02, 01, 03);
   Dynamix.setGain(02, 200, 03, 'p');
   Dynamix.setGain(02, 20, 03, 'i');
   Dynamix.setGain(02, 20, 03, 'd');
   Dynamix.setAccelerationProfile(02, 100, 03);
   Dynamix.setVelocityProfile(02, 50, 03);
 
-  menuClass.reset(); // reset the display
-  menuClass.begin(0x9341); // start communication with the display on given address
+  tft.reset(); // reset the display
+  tft.begin(0x9341); // start communication with the display on given address
   pinMode(upButton, INPUT_PULLUP); // buttons for menu control
   pinMode(downButton, INPUT_PULLUP);
   pinMode(selectButton, INPUT_PULLUP);
-  menuClass.fillScreen(BLACK); //fill whole screen with color black (not required, but then the screen will flash with grey colors)
+  tft.fillScreen(BLACK); //fill whole screen with color black (not required, but then the screen will flash with grey colors)
   callibration(); // calibration function
-  menuClass.fillScreen(BLACK); 
+  tft.fillScreen(BLACK); 
   updateMenu(); // updating the switch menu state
 
 }
 
+//Print Pointer
+  void printPointer(){
+    tft.setCursor(40,PointerY[y]);
+    tft.print("->");
+  }
 
 void startup() {
   for (int i = 0; i < 10; i++) {
@@ -87,30 +97,30 @@ bool moving= false;
   // the menu, where only pointer moves
   void updateMenu(){
     if (MainMenu == true){  // prints the main menu IF the user IS in the main menu 
-    menuClass.PrintMainMenu();  
+    tft.PrintMainMenu();  
     };
     switch (menu){
     case 0:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer(y);
+    tft.fillRect(40,0,33,240,BLACK);
+    tft.printPointer(y);
     break;
     case 1:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer(y);
+    tft.fillRect(40,0,33,240,BLACK);
+    printPointer(y);
     break;
     case 2:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer(y);
+    tft.fillRect(40,0,33,240,BLACK);
+    printPointer(y);
 
     break;
     case 3:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer(y);
+    tft.fillRect(40,0,33,240,BLACK);
+    printPointer(y);
     
     break;
     case 4:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer(y);
+    tft.fillRect(40,0,33,240,BLACK);
+    printPointer(y);
     
     break;
     }
@@ -122,13 +132,15 @@ bool moving= false;
     if (MainMenu == false){ //cheks if the user is in the main menu
       
       if(Point1State == false){ // checks wheter or not the points "store" coordinates in them
-      menuClass.SetParam(RED,3,70,PointerY[y]); //sets the color, text size and the coordinates for the text location
-      menuClass.print(" Point 1 ",0); //prints text to the screen, where "0" is ordinary print and "1" is println
+      tft.setTextColor(RED);  tft.setTextSize(3); //sets the color, text size and the coordinates for the text location
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 1 "); //prints text to the screen, where "0" is ordinary print and "1" is println
       Point1State = true; 
       } 
       else if(Point1State == true){
-      menuClass.SetParam(GREEN,3,70,PointerY[y]);
-      menuClass.print(" Point 1 ",0);
+      tft.setTextColor(GREEN);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 1 ");
       Point1State = false;
       }
     }
@@ -137,13 +149,15 @@ bool moving= false;
     if (MainMenu == false){
       
       if(Point2State == false){
-      menuClass.SetParam(RED,3,70,PointerY[y]);
-      menuClass.print(" Point 2 ",0);
+      tft.setTextColor(RED);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 2 ");
       Point2State = true; 
       } 
       else if(Point2State == true){
-      menuClass.SetParam(GREEN,3,70,PointerY[y]);
-      menuClass.print(" Point 2 ",0);
+      tft.setTextColor(GREEN);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 2 ");
       Point2State = false;
       }
     }
@@ -153,13 +167,15 @@ bool moving= false;
     if (MainMenu == false){
       
       if(Point3State == false){
-      menuClass.SetParam(RED,3,70,PointerY[y]);
-      menuClass.print(" Point 3 ",0);
+      tft.setTextColor(RED);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 3 ");
       Point3State = true;
       }
       else if(Point3State == true){
-      menuClass.SetParam(GREEN,3,70,PointerY[y]);
-      menuClass.print(" Point 3 ",0);
+      tft.setTextColor(GREEN);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 3 ");
       Point3State = false; 
       }
     }
@@ -169,26 +185,28 @@ bool moving= false;
     if (MainMenu == false){
       
       if(Point4State == false){
-      menuClass.SetParam(RED,3,70,PointerY[y]);
-      menuClass.print(" Point 4 ",0);
-      Point4State = true; 
+      tft.setTextColor(RED);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 4 ");
+      Point4State = true;
       } 
       else if(Point4State == true){
-      menuClass.SetParam(GREEN,3,70,PointerY[y]);
-      menuClass.print(" Point 4 ",0);
+      tft.setTextColor(GREEN);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 4 ");
       Point4State = false;
       }
     }
       break;
     case 4:
-    menuClass.fillScreen(BLACK);
+    tft.fillScreen(BLACK);
     if(MainMenu == true){
-    menuClass.PrintSubMenu();
+    PrintSubMenu();
     MainMenu = false;  
     }
     else{
-    menuClass.fillScreen(BLACK);
-    menuClass.PrintMainMenu();
+    tft.fillScreen(BLACK);
+    tft.PrintMainMenu();
     MainMenu = true;
     }
       break;
@@ -197,8 +215,9 @@ bool moving= false;
 void callibration(){ //not actually used yet
     while (millis() < 5000) 
     {
-    menuClass.SetParam(GREEN,3,0,35);
-    menuClass.print(" Shake ur head along X-axis",0);
+    tft.setTextColor(GREEN);  tft.setTextSize(2);
+    tft.setCursor(70,PointerY[y]);
+    tft.print(" Shake ur head along X-axis");
     xbee.updateData();
     sensorValue = xbee.getAccX(); //sets the sensorValue to the input from the accelerometer 
     Serial.println(sensorValue); // just to display the resulting number
@@ -209,9 +228,10 @@ void callibration(){ //not actually used yet
     sensorMin = sensorValue;
     }
   
-  sensorValue = map(sensorValue, sensorMin, sensorMax, 0, 255);
-    menuClass.SetParam(GREEN,2,0,70);
-    //menuClass.print(sensorValue,0);
+    sensorValue = map(sensorValue, sensorMin, sensorMax, 0, 255);
+    tft.setTextColor(GREEN);  tft.setTextSize(2);
+    tft.setCursor(70,PointerY[y]);
+    tft.print(sensorValue);
     }
 }
 void loop() {
@@ -246,7 +266,9 @@ void loop() {
    while(moving==true){
       moving = Dynamix.getMoving(02);
       //delay(2);
-      Serial.println("moving2");}
+      Serial.println("moving2");
+    }
+
     if (!digitalRead(downButton)){
     menu++;
     y++;

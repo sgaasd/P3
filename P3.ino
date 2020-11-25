@@ -1,7 +1,8 @@
 #include "src/libs/EMG_Lib/EMG.h"
 #include "src/libs/IntervalTimer/IntervalTimer.h"
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
-#include "src/libs/EMG_menu/EMG_menu.h"
+#include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
+//#include "src/libs/Elegoo_GFX/Elegoo_GFX.h"
 
 #define LCD_CS A3
 #define LCD_CD A2
@@ -79,6 +80,75 @@ void setup() {
   updateMenu(); // updating the switch menu state
 
 }
+//Print main menu
+  void PrintMainMenu(){
+    tft.setTextColor(WHITE);  tft.setTextSize(3);
+    tft.setCursor(70,35);
+    tft.print(" Joint 1 ");
+    tft.setCursor(70,70);
+    tft.print(" Joint 2 ");
+    tft.setCursor(70,105);
+    tft.print(" Joint 3 ");
+    tft.setCursor(70,140);
+    tft.print(" Gripper " );
+    tft.setCursor(70,175);
+    tft.print(" Points ");
+  }
+//Print sub menu
+  void PrintSubMenu(){
+    //tft.setCursor(0,0);
+    tft.println();
+    if(Point1State == false){ // checks wheter or not the points "store" coordinates in them
+      tft.setTextColor(RED);  tft.setTextSize(3); //sets the color, text size and the coordinates for the text location
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 1 "); //prints text to the screen, where "0" is ordinary print and "1" is println 
+      } 
+      else if(Point1State == true){
+      tft.setTextColor(GREEN);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 1 ");
+      }
+   
+    if(Point2State == false){
+      tft.setTextColor(RED);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 2 ");
+      } 
+      else if(Point2State == true){
+      tft.setTextColor(GREEN);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 2 ");
+      }
+      
+    if(Point3State == false){
+      tft.setTextColor(RED);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 3 ");
+      Point3State = true;
+      }
+      else if(Point3State == true){
+      tft.setTextColor(GREEN);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 3 ");
+      Point3State = false; 
+      }
+      
+    if(Point4State == false){
+      tft.setTextColor(RED);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 4 ");
+      Point4State = true;
+      } 
+      else if(Point4State == true){
+      tft.setTextColor(GREEN);  tft.setTextSize(3);
+      tft.setCursor(70,PointerY[y]);
+      tft.print(" Point 4 ");
+      Point4State = false;
+      }
+      
+    tft.setCursor(70,175);
+    tft.print(" Back ");
+  }
 
 //Print Pointer
   void printPointer(){
@@ -97,30 +167,30 @@ bool moving= false;
   // the menu, where only pointer moves
   void updateMenu(){
     if (MainMenu == true){  // prints the main menu IF the user IS in the main menu 
-    tft.PrintMainMenu();  
+    PrintMainMenu();  
     };
     switch (menu){
     case 0:
     tft.fillRect(40,0,33,240,BLACK);
-    tft.printPointer(y);
+    printPointer();
     break;
     case 1:
     tft.fillRect(40,0,33,240,BLACK);
-    printPointer(y);
+    printPointer();
     break;
     case 2:
     tft.fillRect(40,0,33,240,BLACK);
-    printPointer(y);
+    printPointer();
 
     break;
     case 3:
     tft.fillRect(40,0,33,240,BLACK);
-    printPointer(y);
+    printPointer();
     
     break;
     case 4:
     tft.fillRect(40,0,33,240,BLACK);
-    printPointer(y);
+    printPointer();
     
     break;
     }
@@ -206,7 +276,7 @@ bool moving= false;
     }
     else{
     tft.fillScreen(BLACK);
-    tft.PrintMainMenu();
+    PrintMainMenu();
     MainMenu = true;
     }
       break;
@@ -277,7 +347,7 @@ void loop() {
      y = 0;
     }
     updateMenu();
-    delay(50);
+    //delay(50);
     //while (!digitalRead(downButton));
   }
   if (!digitalRead(upButton)){
@@ -288,13 +358,13 @@ void loop() {
       y = 4;
     }
     updateMenu();
-    delay(50);
+    //delay(50);
     //while (!digitalRead(upButton));
   }
   if (!digitalRead(selectButton)){
     execute();
     ///updateMenu();
-    delay(50);
+    //delay(50);
     while (!digitalRead(selectButton));
   }
 }

@@ -83,68 +83,7 @@ void startup() {
   }
 }
 bool moving= false;
-void loop() {
-  while (!Serial2) {}
-  startup();
-  value = Dynamix.getPosition(02);
- //Serial.println(value);
 
-    realValue = value + 100;
-
-
-    delay(2);
-    Dynamix.setPosition(02, 3000, 03); 
-    delay(1);
-    Serial.println("reg_write1");
-    delay(1000);
-    Dynamix.setAction(02);
-    delay(1);
-    moving = Dynamix.getMoving(02);
-    while(moving==true){
-      moving = Dynamix.getMoving(02);
-      delay(2);
-      Serial.println("moving1");}
-      
-    delay(2);
-    Dynamix.setPosition(02, 1000, 03); 
-    delay(1);
-    Serial.println("reg_write2");
-    delay(1000);
-    Dynamix.setAction(02);
-    delay(1);
-   while(moving==true){
-      moving = Dynamix.getMoving(02);
-      delay(2);
-      Serial.println("moving2");}
-    if (!digitalRead(downButton)){
-    menu++;
-    y++;
-    if (menu>4){
-     menu=0;
-     y = 0;
-    }
-    updateMenu();
-    delay(200);
-    //while (!digitalRead(downButton));
-  }
-  if (!digitalRead(upButton)){
-    menu--;
-    y--;
-    if (menu<0){
-      menu=4;
-      y = 4;
-    }
-    updateMenu();
-    delay(200);
-    //while (!digitalRead(upButton));
-  }
-  if (!digitalRead(selectButton)){
-    execute();
-    ///updateMenu();
-    delay(200);
-    while (!digitalRead(selectButton));
-  }
-}
   // the menu, where only pointer moves
   void updateMenu(){
     if (MainMenu == true){  // prints the main menu IF the user IS in the main menu 
@@ -274,4 +213,66 @@ void callibration(){ //not actually used yet
     menuClass.SetParam(GREEN,2,0,70);
     menuClass.print(sensorValue,0);
     }
+}
+void loop() {
+  while (!Serial2) {}
+  startup();
+  value = Dynamix.getPosition(02);
+ //Serial.println(value);
+
+    realValue = value + 100;
+
+
+    delay(2);
+    Dynamix.setPosition(02, 3000, 03); 
+    delay(1);
+    Serial.println("reg_write1");
+    delay(1000);
+    Dynamix.setAction(02);
+    delay(1);
+    moving = Dynamix.getMoving(02);
+    while(moving==true){
+      moving = Dynamix.getMoving(02);
+      delay(2);
+      Serial.println("moving1");}
+      
+    delay(2);
+    Dynamix.setPosition(02, 1000, 03); 
+    delay(1);
+    Serial.println("reg_write2");
+    delay(1000);
+    Dynamix.setAction(02);
+    delay(1);
+   while(moving==true){
+      moving = Dynamix.getMoving(02);
+      delay(2);
+      Serial.println("moving2");}
+    if (!digitalRead(downButton)){
+    menu++;
+    y++;
+    if (menu>4){
+     menu=0;
+     y = 0;
+    }
+    updateMenu();
+    delay(200);
+    //while (!digitalRead(downButton));
+  }
+  if (!digitalRead(upButton)){
+    menu--;
+    y--;
+    if (menu<0){
+      menu=4;
+      y = 4;
+    }
+    updateMenu();
+    delay(200);
+    //while (!digitalRead(upButton));
+  }
+  if (!digitalRead(selectButton)){
+    execute();
+    ///updateMenu();
+    delay(200);
+    while (!digitalRead(selectButton));
+  }
 }

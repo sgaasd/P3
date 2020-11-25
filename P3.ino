@@ -116,139 +116,7 @@ void loop() {
       moving = Dynamix.getMoving(02);
       delay(2);
       Serial.println("moving2");}
-}
-  // the menu, where only pointer moves
-  void updateMenu(){
-    if (MainMenu == true){  // prints the main menu IF the user IS in the main menu 
-    PrintMainMenu();  
-    };
-    switch (menu){
-    case 0:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    printPointer();
-    break;
-    case 1:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    printPointer();
-    break;
-    case 2:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    printPointer();
-
-    break;
-    case 3:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    printPointer();
-    
-    break;
-    case 4:
-    menuClass.fillRect(40,0,33,240,BLACK);
-    printPointer();
-    
-    break;
-    }
-  }
-
-  void execute() {  //the "select" function
-  switch (menu) {
-    case 0:
-    if (MainMenu == false){ //cheks if the user is in the main menu
-      
-      if(Point1State == false){ // checks wheter or not the points "store" coordinates in them
-      menuClass.SetParam(RED,3,70,PointerY[y]); //sets the color, text size and the coordinates for the text location
-      menuClass.print(" Point 1 ",0); //prints text to the screen, where "0" is ordinary print and "1" is println
-      PointState = true; 
-      } 
-      else if(Poin1tState == true){
-      menuClass.SetParam(GREEN,3,70,PointerY[y]);
-      menuClass.print(" Point 1 ",0);
-      PointState = false;
-      }
-    }
-      break;
-    case 1:
-    if (MainMenu == false){
-      
-      if(Point2State == false){
-      menuClass.SetParam(RED,3,70,PointerY[y]);
-      menuClass.print(" Point 2 ",0);
-      PointState = true; 
-      } 
-      else if(Point2State == true){
-      menuClass.SetParam(GREEN,3,70,PointerY[y]);
-      menuClass.print(" Point 2 ",0);
-      PointState = false;
-      }
-    }
-      break;
-
-    case 2:
-    if (MainMenu == false){
-      
-      if(Point3State == false){
-      menuClass.SetParam(RED,3,70,PointerY[y]);
-      menuClass.print(" Point 3 ",0);
-      PointState = true;
-      }
-      else if(Point3State == true){
-      menuClass.SetParam(GREEN,3,70,PointerY[y])
-      menuClass.print(" Point 3 ",0);
-      PointState = false; 
-      }
-    }
-      break;
-
-    case 3:
-    if (MainMenu == false){
-      
-      if(Point4State == false){
-      menuClass.SetParam(RED,3,70,PointerY[y]);
-      menuClass.print(" Point 4 ",0);
-      PointState = true; 
-      } 
-      else if(Point4State == true){
-      menuClass.SetParam(GREEN,3,70,printPointer[y]);
-      menuClass.print(" Point 4 ",0);
-      PointState = false;
-      }
-    }
-      break;
-    case 4:
-    menuClass.fillScreen(BLACK);
-    if(MainMenu == true){
-    PrintSubMenu();
-    MainMenu = false;  
-    }
-    else{
-    menuClass.fillScreen(BLACK);
-    PrintMainMenu();
-    MainMenu = true;
-    }
-      break;
-  }
-}
-void callibration(){ //not actually used yet
-    while (millis() < 5000) 
-    {
-    menuClass.SetParam(GREEN,3,0,35);
-    menuClass.print(" Shake ur head along X-axis",0);
-    xbee.updateData();
-    sensorValue = xbee.getAccX(); //sets the sensorValue to the input from the accelerometer 
-    Serial.println(sensorValue); // just to display the resulting number
-    if (sensorValue > sensorMax) { // record the maximum sensor value
-    sensorMax = sensorValue;
-    }
-    if (sensorValue < sensorMin) {// record the minimum sensor value
-    sensorMin = sensorValue;
-    }
-  
-  sensorValue = map(sensorValue, sensorMin, sensorMax, 0, 255);
-    menuClass.SetParam(GREEN,2,0,70);
-    menuClass.print(sensorValue,0);
-    }
-}
-void loop() {
-  if (!digitalRead(downButton)){
+    if (!digitalRead(downButton)){
     menu++;
     y++;
     if (menu>4){
@@ -276,4 +144,134 @@ void loop() {
     delay(200);
     while (!digitalRead(selectButton));
   }
+}
+  // the menu, where only pointer moves
+  void updateMenu(){
+    if (MainMenu == true){  // prints the main menu IF the user IS in the main menu 
+    menuClass.PrintMainMenu();  
+    };
+    switch (menu){
+    case 0:
+    menuClass.fillRect(40,0,33,240,BLACK);
+    menuClass.printPointer();
+    break;
+    case 1:
+    menuClass.fillRect(40,0,33,240,BLACK);
+    menuClass.printPointer();
+    break;
+    case 2:
+    menuClass.fillRect(40,0,33,240,BLACK);
+    menuClass.printPointer();
+
+    break;
+    case 3:
+    menuClass.fillRect(40,0,33,240,BLACK);
+    menuClass.printPointer();
+    
+    break;
+    case 4:
+    menuClass.fillRect(40,0,33,240,BLACK);
+    menuClass.printPointer();
+    
+    break;
+    }
+  }
+
+  void execute() {  //the "select" function
+  switch (menu) {
+    case 0:
+    if (MainMenu == false){ //cheks if the user is in the main menu
+      
+      if(Point1State == false){ // checks wheter or not the points "store" coordinates in them
+      menuClass.SetParam(RED,3,70,PointerY[y]); //sets the color, text size and the coordinates for the text location
+      menuClass.print(" Point 1 ",0); //prints text to the screen, where "0" is ordinary print and "1" is println
+      Point1State = true; 
+      } 
+      else if(Point1State == true){
+      menuClass.SetParam(GREEN,3,70,PointerY[y]);
+      menuClass.print(" Point 1 ",0);
+      Point1State = false;
+      }
+    }
+      break;
+    case 1:
+    if (MainMenu == false){
+      
+      if(Point2State == false){
+      menuClass.SetParam(RED,3,70,PointerY[y]);
+      menuClass.print(" Point 2 ",0);
+      Point2State = true; 
+      } 
+      else if(Point2State == true){
+      menuClass.SetParam(GREEN,3,70,PointerY[y]);
+      menuClass.print(" Point 2 ",0);
+      Point2State = false;
+      }
+    }
+      break;
+
+    case 2:
+    if (MainMenu == false){
+      
+      if(Point3State == false){
+      menuClass.SetParam(RED,3,70,PointerY[y]);
+      menuClass.print(" Point 3 ",0);
+      Point3State = true;
+      }
+      else if(Point3State == true){
+      menuClass.SetParam(GREEN,3,70,PointerY[y]);
+      menuClass.print(" Point 3 ",0);
+      Point3State = false; 
+      }
+    }
+      break;
+
+    case 3:
+    if (MainMenu == false){
+      
+      if(Point4State == false){
+      menuClass.SetParam(RED,3,70,PointerY[y]);
+      menuClass.print(" Point 4 ",0);
+      Point4State = true; 
+      } 
+      else if(Point4State == true){
+      menuClass.SetParam(GREEN,3,70,PointerY[y]);
+      menuClass.print(" Point 4 ",0);
+      Point4State = false;
+      }
+    }
+      break;
+    case 4:
+    menuClass.fillScreen(BLACK);
+    if(MainMenu == true){
+    menuClass.PrintSubMenu();
+    MainMenu = false;  
+    }
+    else{
+    menuClass.fillScreen(BLACK);
+    menuClass.PrintMainMenu();
+    MainMenu = true;
+    }
+      break;
+  }
+}
+void callibration(){ //not actually used yet
+    while (millis() < 5000) 
+    {
+    menuClass.SetParam(GREEN,3,0,35);
+    menuClass.print(" Shake ur head along X-axis",0);
+    xbee.updateData();
+    sensorValue = xbee.getAccX(); //sets the sensorValue to the input from the accelerometer 
+    Serial.println(sensorValue); // just to display the resulting number
+    if (sensorValue > sensorMax) { // record the maximum sensor value
+    sensorMax = sensorValue;
+    }
+    if (sensorValue < sensorMin) {// record the minimum sensor value
+    sensorMin = sensorValue;
+    }
+  
+  sensorValue = map(sensorValue, sensorMin, sensorMax, 0, 255);
+    menuClass.SetParam(GREEN,2,0,70);
+    menuClass.print(sensorValue,0);
+    }
 }

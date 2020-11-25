@@ -92,25 +92,25 @@ bool moving= false;
     switch (menu){
     case 0:
     menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer();
+    menuClass.printPointer(y);
     break;
     case 1:
     menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer();
+    menuClass.printPointer(y);
     break;
     case 2:
     menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer();
+    menuClass.printPointer(y);
 
     break;
     case 3:
     menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer();
+    menuClass.printPointer(y);
     
     break;
     case 4:
     menuClass.fillRect(40,0,33,240,BLACK);
-    menuClass.printPointer();
+    menuClass.printPointer(y);
     
     break;
     }
@@ -211,7 +211,7 @@ void callibration(){ //not actually used yet
   
   sensorValue = map(sensorValue, sensorMin, sensorMax, 0, 255);
     menuClass.SetParam(GREEN,2,0,70);
-    menuClass.print(sensorValue,0);
+    //menuClass.print(sensorValue,0);
     }
 }
 void loop() {

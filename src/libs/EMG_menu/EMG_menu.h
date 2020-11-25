@@ -16,18 +16,19 @@ class EMGmenu
 {
 private:
 //coordinates for pointer cursor                                            
- 
+int PointerY[5]={35,70,105,140,170}; // array with y coordinates for pointer
+
     
 public:
     void PrintMainMenu();
     void PrintSubMenu();
     void SetParam(int color, int size, int x, int y);
     void print(String text, int type);
-    void print(int value, int type);
+    //void print(int value, int type);
     void reset();
     void begin(int addr);
     void fillScreen(int color);
     void fillRect(int x,int y,int width,int height, int color);
-    void printPointer();
+    void printPointer(int y);
 };
 

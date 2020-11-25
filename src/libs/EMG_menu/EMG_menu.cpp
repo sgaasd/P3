@@ -77,7 +77,7 @@ Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
   void EMGmenu::fillRect(int x,int y,int width,int height, int color){
     tft.fillRect(x,y,width,height,color);
   }
-  void printPointer(){
-    menuClass.SetParam(WHITE,3,40,PointerY[y]);
-    menuClass.print("->",0);
+  void EMGmenu::printPointer(int y){
+    SetParam(WHITE,3,40,PointerY[y]);
+    print("->",0);
   }

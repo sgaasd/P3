@@ -223,29 +223,29 @@ void loop() {
     realValue = value + 100;
 
 
-    delay(2);
+    //delay(2);
     Dynamix.setPosition(02, 3000, 03); 
-    delay(1);
+    //delay(1);
     Serial.println("reg_write1");
-    delay(1000);
+    //delay(1000);
     Dynamix.setAction(02);
-    delay(1);
+    //delay(1);
     moving = Dynamix.getMoving(02);
     while(moving==true){
       moving = Dynamix.getMoving(02);
-      delay(2);
+      //delay(2);
       Serial.println("moving1");}
       
-    delay(2);
+    //delay(2);
     Dynamix.setPosition(02, 1000, 03); 
-    delay(1);
+    //delay(1);
     Serial.println("reg_write2");
-    delay(1000);
+    //delay(1000);
     Dynamix.setAction(02);
-    delay(1);
+    //delay(1);
    while(moving==true){
       moving = Dynamix.getMoving(02);
-      delay(2);
+      //delay(2);
       Serial.println("moving2");}
     if (!digitalRead(downButton)){
     menu++;
@@ -255,7 +255,7 @@ void loop() {
      y = 0;
     }
     updateMenu();
-    delay(200);
+    delay(50);
     //while (!digitalRead(downButton));
   }
   if (!digitalRead(upButton)){
@@ -266,13 +266,13 @@ void loop() {
       y = 4;
     }
     updateMenu();
-    delay(200);
+    delay(50);
     //while (!digitalRead(upButton));
   }
   if (!digitalRead(selectButton)){
     execute();
     ///updateMenu();
-    delay(200);
+    delay(50);
     while (!digitalRead(selectButton));
   }
 }

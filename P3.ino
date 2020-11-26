@@ -101,7 +101,7 @@ void setup() {
     if(Point1State == false){ // checks wheter or not the points "store" coordinates in them
       tft.setTextColor(RED);  tft.setTextSize(3); //sets the color, text size and the coordinates for the text location
       tft.setCursor(70,35);
-      tft.print(" Point 1 "); //prints text to the screen, where "0" is ordinary print and "1" is println 
+      tft.print(" Point 1 "); //prints text to the screen
       } 
       else if(Point1State == true){
       tft.setTextColor(GREEN);  tft.setTextSize(3);
@@ -124,26 +124,22 @@ void setup() {
       tft.setTextColor(RED);  tft.setTextSize(3);
       tft.setCursor(70,105);
       tft.print(" Point 3 ");
-      Point3State = true;
       }
       else if(Point3State == true){
       tft.setTextColor(GREEN);  tft.setTextSize(3);
       tft.setCursor(70,105);
-      tft.print(" Point 3 ");
-      Point3State = false; 
+      tft.print(" Point 3 "); 
       }
       
     if(Point4State == false){
       tft.setTextColor(RED);  tft.setTextSize(3);
       tft.setCursor(70,140);
       tft.print(" Point 4 ");
-      Point4State = true;
       } 
       else if(Point4State == true){
       tft.setTextColor(GREEN);  tft.setTextSize(3);
       tft.setCursor(70,140);
       tft.print(" Point 4 ");
-      Point4State = false;
       }
       
     tft.setCursor(70,175);

@@ -223,7 +223,7 @@ void loop() {
     realValue = value + 100;
 
 
-    delay(2);
+  /*  delay(2);
     Dynamix.setPosition(02, 3000, 03); 
     delay(1);
     Serial.println("reg_write1");
@@ -246,7 +246,8 @@ void loop() {
    while(moving==true){
       moving = Dynamix.getMoving(02);
       delay(2);
-      Serial.println("moving2");}
+      Serial.println("moving2");}*/
+      
     if (!digitalRead(downButton)){
     menu++;
     y++;
@@ -266,13 +267,13 @@ void loop() {
       y = 4;
     }
     updateMenu();
-    delay(200);
+    delay(2);
     //while (!digitalRead(upButton));
   }
   if (!digitalRead(selectButton)){
     execute();
     ///updateMenu();
-    delay(200);
+    delay(2);
     while (!digitalRead(selectButton));
   }
 }

@@ -1,0 +1,6 @@
+# Class
+#######################################
+Dynamixelclass	KEYWORD1
+
+
+setStatusReturnLevel KEYWORD2

@@ -155,7 +155,7 @@ bool Dynamixelclass::getMoving(unsigned char MOTOR_ID){
 
     unsigned char *rArr;
     rArr = sendNreadPacket(Arr, sizeof(Arr));
-	bool result =rArr[9];  //Bitwize or for 2 bit
+	bool result =(bool)rArr[9];  //Bitwize or for 2 bit
     return result; 
 }
 
@@ -225,7 +225,7 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, signed short setVal, un
 void Dynamixelclass::setPositionDegree(unsigned char MOTOR_ID, float setVal, unsigned char setIntruction){
     //short value = (short)setVal / 0.088;
     //short value = short(setVal * 4096 / 360);
-    setPosition(MOTOR_ID, short(setVal * 4096 / 360), setIntruction);
+    setPosition(MOTOR_ID, short(setVal * 4095 / 360), setIntruction);
 }
 
 void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){

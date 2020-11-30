@@ -22,7 +22,6 @@
 
 EMGclass xbee;
 Dynamixelclass Dynamix;
-//EMGmenu menuClass;
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 bool start = false;
@@ -144,7 +143,11 @@ void setup() {
   delay(2);
   Dynamix.setAction(0xFE);
   delay(2000);
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 078cf16695f26547c889b803e2755c1c3ffc740f
     tft.reset(); // reset the display
     tft.begin(0x9341); // start communication with the display on given address
     pinMode(upButton, INPUT_PULLUP); // buttons for menu control
@@ -154,7 +157,11 @@ void setup() {
     callibration(); // calibration function
     tft.fillScreen(BLACK);
     updateMenu(); // updating the switch menu state
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 078cf16695f26547c889b803e2755c1c3ffc740f
 }
 //Print main menu
 void PrintMainMenu() {
@@ -249,12 +256,10 @@ void updateMenu() {
     case 2:
       tft.fillRect(40, 0, 33, 240, BLACK);
       printPointer();
-
       break;
     case 3:
       tft.fillRect(40, 0, 33, 240, BLACK);
       printPointer();
-
       break;
     case 4:
       tft.fillRect(40, 0, 33, 240, BLACK);
@@ -372,6 +377,62 @@ void callibration() { //not actually used yet
     tft.print(sensorValue);
   }
 }
+
+void moving(){
+  switch (menu)
+    {
+      case 0:
+        /* Joint 1 */
+        signed short joint1 = Dynamix.getPosition(01);
+        delay(2);
+        if (xbee.getEMG_CH1() > 100) {
+          Dynamix.setPosition(01, joint1 - 10, 03);
+        }
+        else if (xbee.getEMG_CH2() > 100) {
+          Dynamix.setPosition(01, joint1 + 10, 03);
+        }
+        break;
+
+      case 1:
+        /* joint 2 */
+        signed short joint2 = Dynamix.getPosition(02);
+        delay(2);
+        if (xbee.getEMG_CH1() > 100) {
+          Dynamix.setPosition(02, joint2 - 10, 03);
+        }
+        else if (xbee.getEMG_CH2() > 100) {
+          Dynamix.setPosition(02, joint2 + 10, 03);
+        }
+        break;
+
+      case 2:
+        /* joint 3 */
+        signed short joint3 = Dynamix.getPosition(03);
+        delay(2);
+        if (xbee.getEMG_CH1() > 100) {
+          Dynamix.setPosition(03, joint3 - 10, 03);
+        }
+        else if (xbee.getEMG_CH2() > 100) {
+          Dynamix.setPosition(03, joint3 + 10, 03);
+        }
+        break;
+
+      case 3:
+        /* gripper */
+        signed short gripper = Dynamix.getPosition(4);
+        delay(2);
+        if (gripper > 3000) {// gripper er open
+          Dynamix.setPosition(10, 2000, 03);
+        }
+        if (gripper < 2800) {// gripper er open
+          Dynamix.setPosition(10, 3100, 03);
+        }
+        break;
+
+      default:
+        break;
+    }
+}
 void loop() {
   while (!Serial2) {}
   startup();
@@ -385,7 +446,9 @@ void loop() {
 
     old_time = millis();
 
+    xbee.updateData();
 
+<<<<<<< HEAD
 
 
     if (digitalRead(31) == HIGH) {
@@ -451,6 +514,9 @@ void loop() {
 
   
     if (!digitalRead(downButton)){
+=======
+    if (xbee.getAccY() > 600){ // resting is around 560
+>>>>>>> 078cf16695f26547c889b803e2755c1c3ffc740f
     menu++;
     y++;
     if (menu>4){
@@ -458,10 +524,11 @@ void loop() {
     y = 0;
     }
     updateMenu();
+    moving();
     //delay(50);
     //while (!digitalRead(downButton));
     }
-    if (!digitalRead(upButton)){
+    if (xbee.getAccY() < 500){ // resting is around 560
     menu--;
     y--;
     if (menu<0){
@@ -469,14 +536,24 @@ void loop() {
      y = 4;
     }
     updateMenu();
+    moving();
     delay(2);
     //while (!digitalRead(upButton));
     }
-    if (!digitalRead(selectButton)){
+    if (xbee.getEMG_CH1() > 100){ // resting is around 0
     execute();
     ///updateMenu();
     delay(2);
     while (!digitalRead(selectButton));
     }
+<<<<<<< HEAD
   
+=======
+      while (millis() - old_time < hertz);
+    
+  }
+  
+
+ 
+>>>>>>> 078cf16695f26547c889b803e2755c1c3ffc740f
 }

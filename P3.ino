@@ -143,11 +143,6 @@ void setup() {
   delay(2);
   Dynamix.setAction(0xFE);
   delay(2000);
-<<<<<<< HEAD
-
-=======
-  
->>>>>>> 078cf16695f26547c889b803e2755c1c3ffc740f
     tft.reset(); // reset the display
     tft.begin(0x9341); // start communication with the display on given address
     pinMode(upButton, INPUT_PULLUP); // buttons for menu control
@@ -157,11 +152,6 @@ void setup() {
     callibration(); // calibration function
     tft.fillScreen(BLACK);
     updateMenu(); // updating the switch menu state
-<<<<<<< HEAD
-
-=======
-  
->>>>>>> 078cf16695f26547c889b803e2755c1c3ffc740f
 }
 //Print main menu
 void PrintMainMenu() {
@@ -237,7 +227,6 @@ void startup() {
     delay(10);
   }
 }
-bool moving = false;
 
 // the menu, where only pointer moves
 void updateMenu() {
@@ -448,8 +437,6 @@ void loop() {
 
     xbee.updateData();
 
-<<<<<<< HEAD
-
 
     if (digitalRead(31) == HIGH) {
       /*     value = Dynamix.getPosition(02);
@@ -513,10 +500,9 @@ void loop() {
 
 
   
-    if (!digitalRead(downButton)){
-=======
+    //if (!digitalRead(downButton)){
     if (xbee.getAccY() > 600){ // resting is around 560
->>>>>>> 078cf16695f26547c889b803e2755c1c3ffc740f
+
     menu++;
     y++;
     if (menu>4){
@@ -546,14 +532,5 @@ void loop() {
     delay(2);
     while (!digitalRead(selectButton));
     }
-<<<<<<< HEAD
-  
-=======
-      while (millis() - old_time < hertz);
-    
-  }
-  
-
- 
->>>>>>> 078cf16695f26547c889b803e2755c1c3ffc740f
-}
+      while (millis() - old_time < hertz);   
+  } 

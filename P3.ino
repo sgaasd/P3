@@ -144,7 +144,7 @@ void setup() {
   delay(2);
   Dynamix.setAction(0xFE);
   delay(2000);
-  /*
+
     tft.reset(); // reset the display
     tft.begin(0x9341); // start communication with the display on given address
     pinMode(upButton, INPUT_PULLUP); // buttons for menu control
@@ -154,7 +154,7 @@ void setup() {
     callibration(); // calibration function
     tft.fillScreen(BLACK);
     updateMenu(); // updating the switch menu state
-  */
+
 }
 //Print main menu
 void PrintMainMenu() {
@@ -449,7 +449,7 @@ void loop() {
     }*/
 
 
-  /*
+  
     if (!digitalRead(downButton)){
     menu++;
     y++;
@@ -478,5 +478,5 @@ void loop() {
     delay(2);
     while (!digitalRead(selectButton));
     }
-  */
+  
 }

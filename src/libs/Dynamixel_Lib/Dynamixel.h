@@ -17,12 +17,9 @@ private:
     void sendPacket(unsigned char *arr, int arrSIZE);
     unsigned char* sendNreadPacket(unsigned char *arr, int arrSIZE);
     unsigned short update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size);
-    double atan2(double numerator, double denominator);
+    //double atan2(double numerator, double denominator);
     
     
-    
-    
-
 
 public:
    // Dynamixel(/* args */);
@@ -40,12 +37,14 @@ public:
     void setOperationMode(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setAction(unsigned char MOTOR_ID);
     void setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
+    void setVelocity(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setGain(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction, char setControllerGain);
     void setAccelerationProfile(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setVelocityProfile(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setStatusReturnLevel(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setMaxPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setMinPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
+    
     
     
     int32_t getPosition(unsigned char MOTOR_ID);
@@ -56,7 +55,7 @@ public:
     int32_t getMovingstatus(unsigned char MOTOR_ID);
     bool getMoving(unsigned char MOTOR_ID);
 
-    double* inverseKinematics(double x, double y, double z);
+    void inverseKinematics(double x, double y, double z);
 
 
 

@@ -466,20 +466,22 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     return ReturnPacket; 
 }
 
-double* Dynamixelclass::inverseKinematics(double x, double y, double z){
+void Dynamixelclass::inverseKinematics(double x, double y, double z){
     double L1 = 0.0528;
     double L2 = 0.21988;
     double L3 = 0.22368;
 
-    double Arr[3]; 
+    signed short Arr[3]; 
 
     //Theta 1
     double theta1a=((atan2(y,x))); 
     double theta1b=theta1a+pi;
     double theta1c = theta1a;
     double theta1d = theta1b;
-    Arr[0] = theta1b;
     
+    Arr[0] = (rad2deg(theta1a) * (4095 / 360))+2047;
+    setPosition(01, Arr[0], 04);
+    delay(10);
     double r = sqrt((x*x)+(y*y));
     double c = sqrt((z-L1)*(z-L1)+(r*r));
     double a=atan2((z-L1),r);
@@ -490,23 +492,27 @@ double* Dynamixelclass::inverseKinematics(double x, double y, double z){
     double theta2b = +(a+A)-pi;
     double theta2c = A-a;
     double theta2d = a-A-pi;
-    Arr[1] = rad2deg(theta2b);
-    
+    Arr[1] = (theta2a * (4095 / (2*pi)))+3073;
+    setPosition(02, Arr[1], 04);
+    delay(10);
     //Theta 3
     double theta3 = acos(((L3*L3)+(L2*L2)-(c*c))/(2*L3*L2));
     double theta3a = pi-theta3;
     double theta3b = -pi+theta3;
     double theta3c = -pi+theta3;
     double theta3d = pi-theta3; 
-    Arr[2] = rad2deg(theta3b);
 
-    return Arr;
+    Arr[2] = (theta3a * (4095 / (2*pi)))+2047;
+    setPosition(03, Arr[2], 04);
+delay(10);
+    delay(10);
+    setAction(0xfe);
 }
-
-double Dynamixelclass::atan2(double numerator, double denominator){
+/*
+double Dynamixelclass::atan2(double numerator, double denominator){ //(y,x)
     double value = 0;
     if (numerator > 0){
-        value = atan(denominator / numerator);
+        value = atan((denominator / numerator));
     }
     if (numerator < 0 && denominator >= 0){
         value = (atan(denominator / numerator)) + pi;
@@ -525,7 +531,7 @@ double Dynamixelclass::atan2(double numerator, double denominator){
     }
     return value;
 }
-
+*/
 unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size){
     unsigned short crc_accum = 0;
     unsigned short i, j;

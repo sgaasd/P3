@@ -404,7 +404,9 @@ void Dynamixelclass::setMinPosition(unsigned char MOTOR_ID, unsigned short setVa
 /******************                            ******************/
 
 void Dynamixelclass::clearSerialBuffer(void){
-    while (DynamixelSerial->read() != -1);  // Clear RX buffer;
+    while (DynamixelSerial->available()){
+        DynamixelSerial->read();
+    }  // Clear RX buffer;
 }
 
 double Dynamixelclass::rad2deg(double rad){
@@ -424,11 +426,11 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     delayMicroseconds(500);
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
-    noInterrupts();
+    //noInterrupts();
     delayMicroseconds(500);
     digitalWrite(directionPIN, LOW);
-    interrupts();
-    delay(20);
+    //interrupts();
+    //delay(20);
 }
 
  unsigned char* Dynamixelclass::sendNreadPacket(unsigned char *arr, int arrSIZE){

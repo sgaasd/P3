@@ -392,11 +392,11 @@ void moving() {
     delay(6);
     if (digitalRead(10)) {
       Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
-      delay(6);
+      delay(1);
     }
     else if (digitalRead(11)) {
       Dynamix.setPosition(JOINT_1, sendjointP1, WRITE);
-      delay(6);
+      delay(1);
     }
   }
   else if (menu == 1)
@@ -444,12 +444,14 @@ void moving() {
       Dynamix.setPosition(GRIPPER_BOTH, gripperN, WRITE); // gripper closes
       delay(6);
     }
+    
   }
+  
 }
 void loop() {
   while (!Serial2) {}
   startup();
-  float hertz = 1000 / 20;
+  float hertz = 1000 / 200;
   long old_time;
 
   while (true) {
@@ -490,9 +492,10 @@ void loop() {
       while (!digitalRead(selectButton));
     }
     moving();
-
-
-
+//    if(Dynamix.getMoving(01)==0){
+//    while(Serial2.available()){
+//                             Serial2.read();
+//}}
     while (millis() - old_time < hertz);
   }
 }

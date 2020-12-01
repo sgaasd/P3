@@ -48,6 +48,7 @@ int32_t Dynamixelclass::getPosition(unsigned char MOTOR_ID){
     unsigned char *rArr;
     rArr = sendNreadPacket(Arr, sizeof(Arr)); 
 	int32_t result =(rArr[9] | rArr[10] << 8 | rArr[11] << 16 | rArr[12] << 24);  //Bitwize or for 4bit  
+    //clearSerialBuffer();
     return result; 
 }
 
@@ -218,7 +219,7 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, signed short setVal, un
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
-    clearSerialBuffer(); // Denne linje er mega vigtig for at sikre man kun læser vædierne én gang
+    //clearSerialBuffer(); // Denne linje er mega vigtig for at sikre man kun læser vædierne én gang
     sendPacket(Arr, sizeof(Arr));
 }
 
@@ -438,10 +439,10 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     delayMicroseconds(500);
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
-    noInterrupts();
+    //noInterrupts();
     delayMicroseconds(500);
     digitalWrite(directionPIN, LOW);
-    interrupts();
+   // interrupts();
 
     if (DynamixelSerial->available()) {
     // read the incoming byte:

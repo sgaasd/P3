@@ -12,7 +12,8 @@
  #include "WProgram.h"
 #endif
 
-#include <Elegoo_GFX.h>
+//#include <Elegoo_GFX.h>
+#include "Elegoo_GFX/Elegoo_GFX.h"
 
 // **** IF USING THE LCD BREAKOUT BOARD, COMMENT OUT THIS NEXT LINE. ****
 // **** IF USING THE LCD SHIELD, LEAVE THE LINE ENABLED:             ****

@@ -243,7 +243,7 @@ void Dynamixelclass::setGain(unsigned char MOTOR_ID, unsigned short setVal, unsi
 // Function for setting a desired position for a motor
 // -------------------------------------------------------
 // MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
-// setVal -> input the value the gain shall have
+// setVal -> input the value the position shall have
 // setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE) 
 void Dynamixelclass::setPosition(unsigned char MOTOR_ID, signed short setVal, unsigned char setIntruction){
     signed short val = setVal;
@@ -264,16 +264,26 @@ void Dynamixelclass::setPosition(unsigned char MOTOR_ID, signed short setVal, un
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
-    //clearSerialBuffer(); // Denne linje er mega vigtig for at sikre man kun læser vædierne én gang
+    // clears the serial buffer before sending information to Dynamixel
+    //clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
+// Function setting the position where the input is degrees
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> input the value the position shall have
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE) 
 void Dynamixelclass::setPositionDegree(unsigned char MOTOR_ID, float setVal, unsigned char setIntruction){
-    //short value = (short)setVal / 0.088;
-    //short value = short(setVal * 4096 / 360);
-    setPosition(MOTOR_ID, short(setVal * 4095 / 360), setIntruction);
+    short value = setVal / 0.088;
+    setPosition(MOTOR_ID, value, setIntruction);
 }
 
+// Function for setting the PWM values, when in PWM operation mode 
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> input the PWM value the motor shall have
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE) 
 void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
     unsigned short val = setVal;
     unsigned char val_H = (val & 0x00FF);
@@ -281,41 +291,53 @@ void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsig
 
     unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, setIntruction, 0x64, 0x00, val_L, val_H, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len);
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[12]=CRC_L;
     Arr[13]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
+// Function For setting the Operation mode of the motor
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> 0x00=Current Control Mode
+// ---------- 0x01=Velocity Control Mode
+// ---------- 0x03=Position Control Mode (default)
+// ---------- 0x04=Extended Position Control Mode
+// ---------- 0x05=Current based posistion Control Mode
+// ---------- 0x10=PWM control Control Mode
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE) 
 void Dynamixelclass::setOperationMode(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
     unsigned char Arr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x0B, 0x00, setVal, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len); 
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[11]=CRC_L;
     Arr[12]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
-
-                //0= Current Control Mode
-                //1= velocity Control Mode
-                //3= Position Control Mode (default)
-                //4= Extended Position Control Mode
-                //5= Current based posistion Control Mode
-                //16= PWM control Control Mode
 }
 
+// Function for setting up the acceleration profile of the motor
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> input the profile the motor shall have
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE)
 void Dynamixelclass::setAccelerationProfile(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
-   unsigned short val = setVal;
+    unsigned short val = setVal;
+    // Remainder operation for the input with 4096, if its lower retuns the input value, if higher it returns remainder over 4096
     val %= 4096;
+    //Dividing the value into 4 bytes
     unsigned char val_LL = (val & 0xFF);
     unsigned char val_L =  (val & 0xFF00) >> 8;
     unsigned char val_H =  (val & 0xFF0000) >> 16;
@@ -323,20 +345,28 @@ void Dynamixelclass::setAccelerationProfile(unsigned char MOTOR_ID, unsigned sho
 
     unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x6C, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len); 
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
+// Function for setting the velocity profile of the motor
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> input the profile the motor shall have
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE)
 void Dynamixelclass::setVelocityProfile(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
     unsigned short val = setVal;
+    // Remainder operation for the input with 4096, if its lower retuns the input value, if higher it returns remainder over 4096
     val %= 4096;
+    //Dividing the value into 4 bytes
     unsigned char val_LL = (val & 0xFF);
     unsigned char val_L =  (val & 0xFF00) >> 8;
     unsigned char val_H =  (val & 0xFF0000) >> 16;
@@ -344,67 +374,88 @@ void Dynamixelclass::setVelocityProfile(unsigned char MOTOR_ID, unsigned short s
 
     unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x70, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len);
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
+
+// Function for enabeling the torque on the motor
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> input: 0x00= not enable | 0x01=enable
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE)
 void Dynamixelclass::setEnableTorque(unsigned char MOTOR_ID, unsigned char setVal, unsigned char setIntruction){
     unsigned char Arr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x40, 0x00, setVal, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len); 
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[11]=CRC_L;
     Arr[12]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
+// Function for sending the action command to the motor
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
 void Dynamixelclass::setAction(unsigned char MOTOR_ID){
     unsigned char Arr[10]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x03, 0x00, 0x05, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len); 
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[8]=CRC_L;
     Arr[9]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
+// Function for setting the status return level
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> 0x00=Returns PING Instuction only
+// ---------- 0x01=Returns PING and READ Instuctions only
+// ---------- 0x03=Returns all Instructions
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE)
 void Dynamixelclass::setStatusReturnLevel(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
     unsigned char Arr[13]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x06, 0x00, setIntruction, 0x44, 0x00, setVal, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len);
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[11]=CRC_L;
     Arr[12]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
-
-            /*
-            setVal = 0x00 -> Returns PING Instuction only
-            setVal = 0x01 -> Returns PING and READ Instuctions only
-            setVal = 0x02 -> Returns all Instructions
-            */
 }
 
+// Function for setting the maximum position for a motor
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> input the max postion the motor shall be able to go to
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE)
 void Dynamixelclass::setMaxPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
     unsigned short val = setVal;
+    // Remainder operation for the input with 4096, if its lower retuns the input value, if higher it returns remainder over 4096
     val %= 4096;
+    //Dividing the value into 4 bytes
     unsigned char val_LL = (val & 0xFF);
     unsigned char val_L =  (val & 0xFF00) >> 8;
     unsigned char val_H =  (val & 0xFF0000) >> 16;
@@ -412,20 +463,28 @@ void Dynamixelclass::setMaxPosition(unsigned char MOTOR_ID, unsigned short setVa
 
     unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x30, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len);
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
 
+// Function for setting the minimum position for a motor
+// -------------------------------------------------------
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+// setVal -> input the minimum postion the motor shall be able to go to
+// setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE)
 void Dynamixelclass::setMinPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
     unsigned short val = setVal;
+    // Remainder operation for the input with 4096, if its lower retuns the input value, if higher it returns remainder over 4096
     val %= 4096;
+    //Dividing the value into 4 bytes
     unsigned char val_LL = (val & 0xFF);
     unsigned char val_L =  (val & 0xFF00) >> 8;
     unsigned char val_H =  (val & 0xFF0000) >> 16;
@@ -433,13 +492,14 @@ void Dynamixelclass::setMinPosition(unsigned char MOTOR_ID, unsigned short setVa
 
     unsigned char Arr[16]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x34, 0x00, val_LL, val_L, val_H, val_HH, 0, 0};
     unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len); // MInus two, because the the CRC_L and CRC_H are not included
+    unsigned short crc = update_crc(Arr, len);
     unsigned char CRC_L = (crc & 0x00FF);
     unsigned char CRC_H = (crc>>8) & 0x00FF;
 
     Arr[14]=CRC_L;
     Arr[15]=CRC_H;
 
+    // clears the serial buffer before sending information to Dynamixel
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
@@ -448,36 +508,47 @@ void Dynamixelclass::setMinPosition(unsigned char MOTOR_ID, unsigned short setVa
 /******************                            ******************/
 /******************                            ******************/
 
+// Function for clearing the serial buffer
 void Dynamixelclass::clearSerialBuffer(void){
     while (DynamixelSerial->available()){
-        DynamixelSerial->read();
-    }  // Clear RX buffer;
+        DynamixelSerial->read();}  
 }
 
+// Function for converting radian into degress
+// -------------------------------------------------------
+// rad -> input radian value
 double Dynamixelclass::rad2deg(double rad){
     double deg = 0;
     rad * 180/pi;
     return deg;
  }
 
+// Function for converting degrees into radians
+// -------------------------------------------------------
+// deg -> input degree value
 double Dynamixelclass::deg2rad(double deg){
     double rad = 0;
     deg * pi / 180;
     return rad;
  }
 
+// Function for sending the "set" packet 
+// -------------------------------------------------------
+// arr -> input arrey that shall be send
+// arrSIZE -> input the lenght of the input arrey
 void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     digitalWrite(directionPIN, HIGH);
     delayMicroseconds(500);
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
-    //noInterrupts();
     delayMicroseconds(500);
     digitalWrite(directionPIN, LOW);
-    //interrupts();
-    //delay(20);
 }
 
+// Function for sending and recieving the "get" packet
+// -------------------------------------------------------
+// arr -> input arrey that shall be send
+// arrSIZE -> input the lenght of the input arrey
  unsigned char* Dynamixelclass::sendNreadPacket(unsigned char *arr, int arrSIZE){
     
     unsigned char incomingbyte;
@@ -486,15 +557,13 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     delayMicroseconds(500);
     DynamixelSerial->write(arr, arrSIZE);
     DynamixelSerial->flush();
-    //noInterrupts();
     delayMicroseconds(500);
     digitalWrite(directionPIN, LOW);
-   // interrupts();
 
     if (DynamixelSerial->available()) {
     // read the incoming byte:
         if(DynamixelSerial->read() == 0xFF){
-            if(DynamixelSerial->read() == 0xFF && DynamixelSerial->peek() == 0xFD){    // check that there are  "0xFF" and "0xFD" header data
+            if(DynamixelSerial->read() == 0xFF && DynamixelSerial->peek() == 0xFD){ // check that there are  "0xFF" and "0xFD" header data
                 ReturnPacket[0] = 0xFF;
                 ReturnPacket[1] = 0xFF;
                 ReturnPacket[2] = DynamixelSerial->read(); //0xFD
@@ -505,15 +574,21 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
                 len = (ReturnPacket[6] << 8) + ReturnPacket[5]; // Lenght of remaining status packet
 
                 for(int i=7; i<7+(int)len; i++){
-                    incomingbyte = DynamixelSerial->read();        //Save incomingbyte
-                    ReturnPacket[i]=incomingbyte;          //Save data in ReturnPacket array
+                    incomingbyte = DynamixelSerial->read(); //Save incomingbyte
+                    ReturnPacket[i]=incomingbyte; //Save data in ReturnPacket array
                 }
             }
         }
     }
+    // Returning the Status packet as an arrey
     return ReturnPacket; 
 }
 
+// Function that calculate the inverse kinematics of for the robot system
+// -------------------------------------------------------
+// x -> input the x axis value at the end-effector
+// y -> input the y axis value at the end-effector
+// z -> input the z axis value at the end-effector
 void Dynamixelclass::inverseKinematics(double x, double y, double z){
     double L1 = 0.0528;
     double L2 = 0.21988;
@@ -543,6 +618,7 @@ void Dynamixelclass::inverseKinematics(double x, double y, double z){
     Arr[1] = (theta2a * (4095 / (2*pi)))+3073;
     setPosition(02, Arr[1], 04);
     delay(10);
+
     //Theta 3
     double theta3 = acos(((L3*L3)+(L2*L2)-(c*c))/(2*L3*L2));
     double theta3a = pi-theta3;
@@ -552,34 +628,15 @@ void Dynamixelclass::inverseKinematics(double x, double y, double z){
 
     Arr[2] = (theta3a * (4095 / (2*pi)))+2047;
     setPosition(03, Arr[2], 04);
-delay(10);
     delay(10);
     setAction(0xfe);
 }
-/*
-double Dynamixelclass::atan2(double numerator, double denominator){ //(y,x)
-    double value = 0;
-    if (numerator > 0){
-        value = atan((denominator / numerator));
-    }
-    if (numerator < 0 && denominator >= 0){
-        value = (atan(denominator / numerator)) + pi;
-    }
-    if (numerator < 0 && denominator < 0){
-        value = (atan(denominator / numerator)) - pi;
-    }
-    if (numerator == 0 && denominator > 0){
-        value = +pi/2;
-    }
-    if (numerator == 0 && denominator < 0){
-        value = -pi/2;
-    }
-    if (numerator == 0 && denominator == 0){
-        value = 0;
-    }
-    return value;
-}
-*/
+
+//Function for calculationg the Cyclic redundancy check(CRC)
+// -------------------------------------------------------
+// data_blk_prt -> input arrey that shall be calculated on
+// data_blk_size -> input the lenght of the input arrey
+// Returns the CRC value in type unsigned short
 unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size){
     unsigned short crc_accum = 0;
     unsigned short i, j;
@@ -623,6 +680,5 @@ unsigned short Dynamixelclass::update_crc(unsigned char *data_blk_ptr, unsigned 
         i = ((unsigned short)(crc_accum >> 8) ^ data_blk_ptr[j]) & 0xFF;
         crc_accum = (crc_accum << 8) ^ crc_table[i];
     }
-
     return crc_accum;
   }

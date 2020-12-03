@@ -383,57 +383,70 @@ void callibration() { //not actually used yet
   }
 }
 
+void PrimeMover(int a){
+  
+}
+
 void moving() {
   if (menu == 0)
   {
     int32_t joint1 = Dynamix.getPosition(JOINT_1);
-    int32_t sendjointN1 = joint1 - 10;
-    int32_t sendjointP1 = joint1 + 10;
+    int32_t sendjointN1 = joint1 - 40;
+    int32_t sendjointP1 = joint1 + 40;
     delay(6);
     if (digitalRead(10)) {
+      Serial.println(micros());
       Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
-      delay(1);
+      Serial.println(micros());
+
+      delay(90);
     }
     else if (digitalRead(11)) {
       Dynamix.setPosition(JOINT_1, sendjointP1, WRITE);
-      delay(1);
+      delay(90);
     }
+
+    while (!digitalRead(10)&&digitalRead(10))
+    {
+      /* code */
+    }
+    
   }
   else if (menu == 1)
   {
     int32_t joint2 = Dynamix.getPosition(JOINT_2);
-    int32_t sendjointN2 = joint2 - 10;
-    int32_t sendjointP2 = joint2 + 10;
+    int32_t sendjointN2 = joint2 - 40;
+    int32_t sendjointP2 = joint2 + 40;
     delay(6);
     if (digitalRead(10)) {
       Dynamix.setPosition(JOINT_2, sendjointN2, WRITE);
-      delay(6);
+      delay(90);
     }
     else if (digitalRead(11)) {
       Dynamix.setPosition(JOINT_2, sendjointP2, WRITE);
-      delay(6);
+      delay(90);
     }
   }
   else if (menu == 2)
   {
     int32_t joint3 = Dynamix.getPosition(JOINT_3);
-    int32_t sendjointN3 = joint3 - 10;
-    int32_t sendjointP3 = joint3 + 10;
+    int32_t sendjointN3 = joint3 - 40;
+    int32_t sendjointP3 = joint3 + 40;
     delay(6);
     if (digitalRead(10)) {
       Dynamix.setPosition(JOINT_3, sendjointN3, WRITE);
-      delay(6);
+      delay(90);
     }
     else if (digitalRead(11)) {
       Dynamix.setPosition(JOINT_3, sendjointP3, WRITE);
-      delay(6);
+      delay(90);
     }
   }
   else if (menu == 3)
   {
     int32_t gripper = Dynamix.getPosition(GRIPPER_LEFT);
-    int32_t gripperN = gripper - 10;
-    int32_t gripperP = gripper + 10;
+    int32_t gripperN = gripper - 30;
+    int32_t gripperP = gripper + 30;
     delay(6);
     if (digitalRead(10)) {
       Dynamix.setPosition(GRIPPER_BOTH, gripperP, WRITE); // gripper opens

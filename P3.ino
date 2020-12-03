@@ -395,21 +395,31 @@ void moving() {
     int32_t sendjointP1 = joint1 + 40;
     delay(6);
     if (digitalRead(10)) {
-      Serial.println(micros());
       Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
-      Serial.println(micros());
+        while((sendjointN1-10)>Dynamix.getPosition(JOINT_1)>(sendjointN1+10)){
+        delay(6);
+        Serial.println("waiting...");
+        }
 
-      delay(90);
+      Serial.println("OUT");
     }
     else if (digitalRead(11)) {
       Dynamix.setPosition(JOINT_1, sendjointP1, WRITE);
-      delay(90);
+      while(Dynamix.getMoving(JOINT_1)==0){
+             delay(6);
+        Serial.println("waitin2g...");
+        }
+        
+              Serial.println("OUT2");
+
     }
 
     while (!digitalRead(10)&&digitalRead(10))
     {
       /* code */
     }
+
+
     
   }
   else if (menu == 1)

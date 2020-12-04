@@ -384,8 +384,28 @@ void callibration() { //not actually used yet
 }
 
 void PrimeMover(int a){
-  char Array[4]=
-  
+  const char Limb[]={JOINT_1,JOINT_2, JOINT_3};
+  int32_t joint = Dynamix.getPosition(Limb[a]);
+    int32_t sendjointN = joint - 40;
+    int32_t sendjointP = joint + 40;
+    delay(6);
+    if (digitalRead(10)) {
+      Dynamix.setPosition(Limb[a], sendjointN, WRITE);
+    while((sendjointN-10)>Dynamix.getPosition(Limb[a])){
+      Serial.println("Stuck in while loop");
+        delay(6);
+        }    
+    }
+    else if (digitalRead(11)) {
+      Dynamix.setPosition(Limb[a], sendjointP, WRITE);
+    while((sendjointP+10)<Dynamix.getPosition(Limb[a])){
+             delay(6);
+        }
+    }
+    else{
+      Dynamix.clearSerialBuffer(); 
+       }
+
 }
 
 void moving() {
@@ -469,7 +489,7 @@ void moving() {
 void loop() {
   while (!Serial2) {}
   startup();
-  float hertz = 1000 / 200;
+  float hertz = 1000 / 1000;
   long old_time;
 
   while (true) {
@@ -509,11 +529,15 @@ void loop() {
       delay(2);
       while (!digitalRead(selectButton));
     }
-    moving();
+    //moving();
 //    if(Dynamix.getMoving(01)==0){
 //    while(Serial2.available()){
 //                             Serial2.read();
 //}}
+
+PrimeMover(menu);
+
+
     while (millis() - old_time < hertz);
   }
 }

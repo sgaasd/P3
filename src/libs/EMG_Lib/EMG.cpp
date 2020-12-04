@@ -33,7 +33,7 @@ void EMGclass::updateData(){ //update the value of accelerometer and emg channel
 
                 if(checkSum == 255){
                     Z = (dataPkg[13] << 8) + dataPkg[14];
-                    Y = (dataPkg[15] << 8) + dataPkg[16];
+                    XBEE.ACC.y = (dataPkg[15] << 8) + dataPkg[16];
                     X = (dataPkg[17] << 8) + dataPkg[18];
 
                     CH1 = (dataPkg[19] << 8) + dataPkg[20];
@@ -70,7 +70,7 @@ void EMGclass::updateData(){ //update the value of accelerometer and emg channel
                     }
                     // calculate the average:
                     XBEE.ACC.x = (totalX / numReadings);
-                    XBEE.ACC.y = (totalY / numReadings);
+                   // XBEE.ACC.y = (totalY / numReadings);
                     XBEE.ACC.z = (totalZ / numReadings);
                     XBEE.EMG.CH1 = (totalCH1 / numReadings);
                     XBEE.EMG.CH2 = (totalCH2 / numReadings);

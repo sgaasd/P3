@@ -383,6 +383,43 @@ void callibration() { //not actually used yet
   }
 }
 
+int XbeeMeter(double currentstate){
+  xbee.updateData();
+  
+
+  if(currentstate>720){
+
+    return 1;
+  }
+
+  
+
+  if(currentstate<320){
+    return -1;
+  }
+
+  else
+  {
+    return 0;
+
+  }
+  
+
+}
+int XbeeBuffer(int input){
+  int arr[30];
+  for (int i = 0; i< 30; i++) {
+  arr[i] = input;
+  Serial.print("string");
+ Serial.println(arr[i]);
+      
+  }
+
+
+}
+
+
+
 void PrimeMover(int a){
   const char Limb[]={JOINT_1,JOINT_2, JOINT_3};
   int32_t joint = Dynamix.getPosition(Limb[a]);
@@ -497,9 +534,9 @@ void loop() {
 
     old_time = millis();
 
-    xbee.updateData();
+    //xbee.updateData();
 
-    if (!digitalRead(upButton)) { // resting is around 560
+    if (XbeeMeter(xbee.getAccY())==1) { // resting is around 560
       menu++;
       y++;
       if (menu > 4) {
@@ -508,10 +545,16 @@ void loop() {
       }
       updateMenu();
 
-      //delay(50);
-      //while (!digitalRead(downButton));
+    
+    while (XbeeMeter(xbee.getAccY())==1){
+
+      delay(1);
+      Serial.println("in the while loop");
+     
+      }
     }
-    if (!digitalRead(downButton)) { // resting is around 560
+    
+    if (XbeeMeter(xbee.getAccY())==-1) { // resting is around 560
       menu--;
       y--;
       if (menu < 0) {
@@ -521,7 +564,14 @@ void loop() {
       updateMenu();
 
       delay(2);
-      //while (!digitalRead(upButton));
+
+      while (XbeeMeter(xbee.getAccY())==-1){
+
+      delay(1);
+      Serial.println("in the while loop -1");
+     
+      }
+      
     }
     if (!digitalRead(selectButton)) { // resting is around 0
       execute();
@@ -529,6 +579,8 @@ void loop() {
       delay(2);
       while (!digitalRead(selectButton));
     }
+
+   
     //moving();
 //    if(Dynamix.getMoving(01)==0){
 //    while(Serial2.available()){
@@ -537,6 +589,7 @@ void loop() {
 
 PrimeMover(menu);
 
+//Serial.println(XbeeMeter(xbee.getAccY()));
 
     while (millis() - old_time < hertz);
   }

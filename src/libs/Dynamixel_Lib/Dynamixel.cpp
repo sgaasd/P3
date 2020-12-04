@@ -13,6 +13,12 @@ void Dynamixelclass::begin(HardwareSerial &Serial, uint32_t baudRate, int8_t dir
     delay(1000);
 } 
 
+// Function for clearing the serial buffer
+void Dynamixelclass::clearSerialBuffer(void){
+    while (DynamixelSerial->available()){
+        DynamixelSerial->read();}  
+}
+
 // Function for ping a Dynamixel motor
 // -------------------------------------------------------
 // MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
@@ -504,15 +510,79 @@ void Dynamixelclass::setMinPosition(unsigned char MOTOR_ID, unsigned short setVa
     sendPacket(Arr, sizeof(Arr));
 }
 
+// Function that calculate the inverse kinematics of for the robot system
+// -------------------------------------------------------
+// x -> input the x axis value at the end-effector
+// y -> input the y axis value at the end-effector
+// z -> input the z axis value at the end-effector
+void Dynamixelclass::inverseKinematics(double x, double y, double z){
+    double L1 = 0.0528;
+    double L2 = 0.21988;
+    double L3 = 0.22368;
+
+    signed short Arr[3]; 
+
+    //Theta 1
+    double theta1a=((atan2(y,x))); 
+    double theta1b=theta1a+pi;
+    double theta1c = theta1a;
+    double theta1d = theta1b;
+    
+    Arr[0] = (rad2deg(theta1a) * (4095 / 360))+2047;
+    setPosition(01, Arr[0], 04);
+    delay(10);
+    double r = sqrt((x*x)+(y*y));
+    double c = sqrt((z-L1)*(z-L1)+(r*r));
+    double a=atan2((z-L1),r);
+    double A=acos(((c*c)+(L2*L2)-(L3*L3))/(2*c*L2));
+    
+    //Theta 2
+    double theta2a = -(a+A);
+    double theta2b = +(a+A)-pi;
+    double theta2c = A-a;
+    double theta2d = a-A-pi;
+    Arr[1] = (theta2a * (4095 / (2*pi)))+3073;
+    setPosition(02, Arr[1], 04);
+    delay(10);
+
+    //Theta 3
+    double theta3 = acos(((L3*L3)+(L2*L2)-(c*c))/(2*L3*L2));
+    double theta3a = pi-theta3;
+    double theta3b = -pi+theta3;
+    double theta3c = -pi+theta3;
+    double theta3d = pi-theta3; 
+
+    Arr[2] = (theta3a * (4095 / (2*pi)))+2047;
+    setPosition(03, Arr[2], 04);
+    delay(10);
+    setAction(0xfe);
+}
+
+// Function that calculate the position of the end-effector based on the forward kinematics of the robot
+// -------------------------------------------------------
+// JOINT_1 -> input the postion of the Joint 1
+// JOINT_2 -> input the postion of the Joint 2
+// JOINT_3 -> input the postion of the Joint 3
+// savePointNo -> value: 
+// ------------------------ 1 = point 1
+// ------------------------ 4 = point 2
+// ------------------------ 7 = point 3
+// ------------------------ 10 = point 4
+void Dynamixelclass::forwardKinematics(int32_t JOINT_1, int32_t JOINT_2, int32_t JOINT_3, int savePointNo){
+    double theta1 = JOINT_1 * 0.088;
+    double theta2 = JOINT_2 * 0.088;
+    double theta3 = JOINT_3 * 0.088;
+
+   savePoint[savePointNo] = (cos(theta1)*(5592*cos(theta2 + theta3) + 5497*cos(theta2)))/25000;
+
+   savePoint[savePointNo+1] = (sin(theta1)*(5592*cos(theta2 + theta3) + 5497*cos(theta2)))/25000;
+
+   savePoint[savePointNo+2] = 33/625 - (5497*sin(theta2))/25000 - (699*sin(theta2 + theta3))/3125;
+}
+
 /****************** Here are private functions ******************/
 /******************                            ******************/
 /******************                            ******************/
-
-// Function for clearing the serial buffer
-void Dynamixelclass::clearSerialBuffer(void){
-    while (DynamixelSerial->available()){
-        DynamixelSerial->read();}  
-}
 
 // Function for converting radian into degress
 // -------------------------------------------------------
@@ -582,54 +652,6 @@ void Dynamixelclass::sendPacket(unsigned char *arr, int arrSIZE){
     }
     // Returning the Status packet as an arrey
     return ReturnPacket; 
-}
-
-// Function that calculate the inverse kinematics of for the robot system
-// -------------------------------------------------------
-// x -> input the x axis value at the end-effector
-// y -> input the y axis value at the end-effector
-// z -> input the z axis value at the end-effector
-void Dynamixelclass::inverseKinematics(double x, double y, double z){
-    double L1 = 0.0528;
-    double L2 = 0.21988;
-    double L3 = 0.22368;
-
-    signed short Arr[3]; 
-
-    //Theta 1
-    double theta1a=((atan2(y,x))); 
-    double theta1b=theta1a+pi;
-    double theta1c = theta1a;
-    double theta1d = theta1b;
-    
-    Arr[0] = (rad2deg(theta1a) * (4095 / 360))+2047;
-    setPosition(01, Arr[0], 04);
-    delay(10);
-    double r = sqrt((x*x)+(y*y));
-    double c = sqrt((z-L1)*(z-L1)+(r*r));
-    double a=atan2((z-L1),r);
-    double A=acos(((c*c)+(L2*L2)-(L3*L3))/(2*c*L2));
-    
-    //Theta 2
-    double theta2a = -(a+A);
-    double theta2b = +(a+A)-pi;
-    double theta2c = A-a;
-    double theta2d = a-A-pi;
-    Arr[1] = (theta2a * (4095 / (2*pi)))+3073;
-    setPosition(02, Arr[1], 04);
-    delay(10);
-
-    //Theta 3
-    double theta3 = acos(((L3*L3)+(L2*L2)-(c*c))/(2*L3*L2));
-    double theta3a = pi-theta3;
-    double theta3b = -pi+theta3;
-    double theta3c = -pi+theta3;
-    double theta3d = pi-theta3; 
-
-    Arr[2] = (theta3a * (4095 / (2*pi)))+2047;
-    setPosition(03, Arr[2], 04);
-    delay(10);
-    setAction(0xfe);
 }
 
 //Function for calculationg the Cyclic redundancy check(CRC)

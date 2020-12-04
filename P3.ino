@@ -384,6 +384,7 @@ void callibration() { //not actually used yet
 }
 
 void PrimeMover(int a){
+  char Array[4]=
   
 }
 
@@ -396,28 +397,22 @@ void moving() {
     delay(6);
     if (digitalRead(10)) {
       Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
-        while((sendjointN1-10)>Dynamix.getPosition(JOINT_1)>(sendjointN1+10)){
+    while((sendjointN1-10)>Dynamix.getPosition(JOINT_1)){
         delay(6);
-        Serial.println("waiting...");
-        }
-
-      Serial.println("OUT");
+        }    
     }
     else if (digitalRead(11)) {
       Dynamix.setPosition(JOINT_1, sendjointP1, WRITE);
-      while(Dynamix.getMoving(JOINT_1)==0){
+    while((sendjointP1+10)<Dynamix.getPosition(JOINT_1)){
              delay(6);
-        Serial.println("waitin2g...");
         }
-        
-              Serial.println("OUT2");
-
     }
+    else{
+      Dynamix.clearSerialBuffer(); 
+       }
+   
 
-    while (!digitalRead(10)&&digitalRead(10))
-    {
-      /* code */
-    }
+   
 
 
     

@@ -386,24 +386,17 @@ void callibration() { //not actually used yet
 int XbeeMeter(double currentstate){
   xbee.updateData();
   
-
   if(currentstate>720){
-
     return 1;
   }
-
-  
 
   if(currentstate<320){
     return -1;
   }
 
-  else
-  {
+  else{
     return 0;
-
   }
-  
 
 }
 int XbeeBuffer(int input){

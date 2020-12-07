@@ -173,6 +173,12 @@ void PrintMainMenu() {
   tft.print(" Gripper " );
   tft.setCursor(70, 175);
   tft.print(" Points ");
+  tft.setCursor(70, 210);;
+    while (true)
+    {
+      xbee.updateData();
+      tft.print(xbee.getEMG_CH1);
+    }
 }
 //Print sub menu
 void PrintSubMenu() {

@@ -52,7 +52,10 @@ int sensorMax = 0; // same as above
 int sensorValue = 0; // accelerometer input
 int PointerY[5] = {35, 70, 105, 140, 170}; // array with y coordinates for pointer
 int gripperPos = 0; // 0=open, 1=closed
-
+int potPin1 = A15; //potentiometer på kanal 1
+int potPin2 = A14; //potentiometer på kanal 2
+int val1 = 0;
+int val2 = 0;
 
 void setup() {
   pinMode(10, INPUT);
@@ -179,10 +182,13 @@ void PrintMainMenu() {
       tft.setCursor(70, 210);
       tft.fillRect(70, 210, 70, 40, BLACK);
       xbee.updateData();
-      tft.print(xbee.getEMG_CH1());
+      val1 = analogRead(potPin1);
+      tft.print(val1);
+      ft.setCursor(70, 245);
+      val2 = analogRead(potPin2);
+      tft.print(val2);
       delay(1);
-      Serial.print(xbee.getEMG_CH1());
-      delay(1000);
+      delay(500);
     }
 }
 //Print sub menu
@@ -455,8 +461,9 @@ void moving() {
     int32_t joint1 = Dynamix.getPosition(JOINT_1);
     int32_t sendjointN1 = joint1 - 40;
     int32_t sendjointP1 = joint1 + 40;
+
     delay(6);
-    if (digitalRead(10)) {
+    if (val) {
       Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
     while((sendjointN1-10)>Dynamix.getPosition(JOINT_1)){
         delay(6);
@@ -534,7 +541,7 @@ void loop() {
   long old_time;
 
   while (true) {
-
+    val = analogRead(potPin);
 
     old_time = millis();
 

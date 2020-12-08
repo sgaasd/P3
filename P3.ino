@@ -1,4 +1,4 @@
-#include "src/libs/EMG_Lib/EMG.h"
+  #include "src/libs/EMG_Lib/EMG.h"
 #include "src/libs/IntervalTimer/IntervalTimer.h"
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
 #include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
@@ -180,11 +180,11 @@ void PrintMainMenu() {
     while (true)
     {
       tft.setCursor(70, 210);
-      tft.fillRect(70, 210, 70, 40, BLACK);
+      tft.fillRect(70, 210, 70, 80, BLACK);
       xbee.updateData();
       val1 = analogRead(potPin1);
       tft.print(val1);
-      ft.setCursor(70, 245);
+      tft.setCursor(70, 245);
       val2 = analogRead(potPin2);
       tft.print(val2);
       delay(1);
@@ -463,7 +463,7 @@ void moving() {
     int32_t sendjointP1 = joint1 + 40;
 
     delay(6);
-    if (val) {
+    if (digitalRead(10)) {
       Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
     while((sendjointN1-10)>Dynamix.getPosition(JOINT_1)){
         delay(6);
@@ -541,8 +541,9 @@ void loop() {
   long old_time;
 
   while (true) {
-    val = analogRead(potPin);
-
+    val1 = analogRead(potPin1);
+    val2 = analogRead(potPin2);
+    
     old_time = millis();
 
     //xbee.updateData();

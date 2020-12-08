@@ -463,13 +463,13 @@ void moving() {
     int32_t sendjointP1 = joint1 + 40;
 
     delay(6);
-    if (digitalRead(10)) {
+    if (analogRead(potPin1)) {
       Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
     while((sendjointN1-10)>Dynamix.getPosition(JOINT_1)){
         delay(6);
         }    
     }
-    else if (digitalRead(11)) {
+    else if (analogRead(potPin2)) {
       Dynamix.setPosition(JOINT_1, sendjointP1, WRITE);
     while((sendjointP1+10)<Dynamix.getPosition(JOINT_1)){
              delay(6);

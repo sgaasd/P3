@@ -2,6 +2,7 @@
 #include "src/libs/IntervalTimer/IntervalTimer.h"
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
 #include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
+//#include "src/libs/Elegoo_GFX/Elegoo_GFX.h"
 
 #define LCD_CS A3
 #define LCD_CD A2
@@ -18,25 +19,22 @@
 #define YELLOW  0xFFE0
 #define WHITE   0xFFFF
 
-#define JOINT_1 0x01
-#define JOINT_2 0x02
-#define JOINT_3 0x03
-#define GRIPPER_LEFT 0x04
-#define GRIPPER_RIGHT 0x05
-#define GRIPPER_BOTH 0x0A // Shadow ID 10
-
-#define WRITE 0x03
-#define REQ_WRITE 0x04
-
-#define DIRECTION_PIN 13
-
 
 EMGclass xbee;
 Dynamixelclass Dynamix;
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
+bool start = false;
+void xBeeRead() {
+  xbee.updateData();
+}
+bool ref = true;
+float value = 0;
+float Lastvalue = 0;
+float realValue;
+
 // controlling buttons
-int upButton = 52; 
+int upButton = 52;
 int downButton = 53;
 int selectButton = 51;
 int menu = 0; //menu value for switch
@@ -51,131 +49,126 @@ int sensorMin = 1023; // almost random number for calibration
 int sensorMax = 0; // same as above
 int sensorValue = 0; // accelerometer input
 int PointerY[5] = {35, 70, 105, 140, 170}; // array with y coordinates for pointer
-int gripperPos = 0; // 0=open, 1=closed
 
 
 void setup() {
-  pinMode(10, INPUT);
-  pinMode(11, INPUT);
+  pinMode(31, INPUT);
   Serial.begin(9600);
   xbee.begin(Serial1, 115200);
-  Dynamix.begin(Serial2, 57600, DIRECTION_PIN);
+  Dynamix.begin(Serial2, 57600, 3);
   delay(1000);
   while (!Serial2) {}
-  Dynamix.setStatusReturnLevel(JOINT_1, 01, WRITE);
-  Dynamix.setStatusReturnLevel(JOINT_2, 01, WRITE);
-  Dynamix.setStatusReturnLevel(JOINT_3, 01, WRITE);
-  Dynamix.setStatusReturnLevel(GRIPPER_LEFT, 01, WRITE);
-  Dynamix.setStatusReturnLevel(GRIPPER_RIGHT, 01, WRITE);
+  Dynamix.setStatusReturnLevel(01, 01, 03);
+  Dynamix.setStatusReturnLevel(02, 01, 03);
+  Dynamix.setStatusReturnLevel(03, 01, 03);
+  Dynamix.setStatusReturnLevel(04, 01, 03);
+  Dynamix.setStatusReturnLevel(05, 01, 03);
 
 
-  Dynamix.setOperationMode(JOINT_1, 03, WRITE);
-  Dynamix.setOperationMode(JOINT_2, 03, WRITE);
-  Dynamix.setOperationMode(JOINT_3, 03, WRITE);
-  Dynamix.setOperationMode(GRIPPER_LEFT, 03, WRITE);
-  Dynamix.setOperationMode(GRIPPER_RIGHT, 03, WRITE);
+  Dynamix.setOperationMode(01, 03, 03);
+  Dynamix.setOperationMode(02, 03, 03);
+  Dynamix.setOperationMode(03, 03, 03);
+  Dynamix.setOperationMode(04, 03, 03);
+  Dynamix.setOperationMode(05, 03, 03);
 
 
-  Dynamix.setMaxPosition(JOINT_1, 4095, WRITE);
-  Dynamix.setMinPosition(JOINT_1, 0, WRITE);
+  Dynamix.setMaxPosition(01, 4095, 03);
+  Dynamix.setMinPosition(01, 0, 03);
 
-  Dynamix.setMaxPosition(JOINT_2, 3280, WRITE);
-  Dynamix.setMinPosition(JOINT_2, 754, WRITE);
+  Dynamix.setMaxPosition(02, 3280, 03);
+  Dynamix.setMinPosition(02, 754, 03);
 
-  Dynamix.setMaxPosition(JOINT_3, 3280, WRITE);
-  Dynamix.setMinPosition(JOINT_3, 742, WRITE);
+  Dynamix.setMaxPosition(03, 3280, 03);
+  Dynamix.setMinPosition(03, 742, 03);
 
-  Dynamix.setMaxPosition(GRIPPER_LEFT, 3200, WRITE);
-  Dynamix.setMinPosition(GRIPPER_LEFT, 2000, WRITE);
+  Dynamix.setMaxPosition(04, 3200, 03);
+  Dynamix.setMinPosition(04, 2000, 03);
 
-  Dynamix.setMaxPosition(GRIPPER_RIGHT, 3200, WRITE);
-  Dynamix.setMinPosition(GRIPPER_RIGHT, 2000, WRITE);
-
-
-  Dynamix.setEnableTorque(JOINT_1, 01, WRITE);
-  Dynamix.setEnableTorque(JOINT_2, 01, WRITE);
-  Dynamix.setEnableTorque(JOINT_3, 01, WRITE);
-  Dynamix.setEnableTorque(GRIPPER_LEFT, 01, WRITE);
-  Dynamix.setEnableTorque(GRIPPER_RIGHT, 01, WRITE);
+  Dynamix.setMaxPosition(05, 3200, 03);
+  Dynamix.setMinPosition(05, 2000, 03);
 
 
-  Dynamix.setGain(JOINT_1, 600, WRITE, 'p');
-  Dynamix.setGain(JOINT_1, 20, WRITE, 'i');
-  Dynamix.setGain(JOINT_1, 20, WRITE, 'd');
-
-  Dynamix.setGain(JOINT_2, 600, WRITE, 'p');
-  Dynamix.setGain(JOINT_2, 20, WRITE, 'i');
-  Dynamix.setGain(JOINT_2, 20, WRITE, 'd');
-
-  Dynamix.setGain(JOINT_3, 600, WRITE, 'p');
-  Dynamix.setGain(JOINT_3, 20, WRITE, 'i');
-  Dynamix.setGain(JOINT_3, 20, WRITE, 'd');
-
-  Dynamix.setGain(GRIPPER_LEFT, 600, WRITE, 'p');
-  Dynamix.setGain(GRIPPER_LEFT, 20, WRITE, 'i');
-  Dynamix.setGain(GRIPPER_LEFT, 20, WRITE, 'd');
-
-  Dynamix.setGain(GRIPPER_RIGHT, 600, WRITE, 'p');
-  Dynamix.setGain(GRIPPER_RIGHT, 20, WRITE, 'i');
-  Dynamix.setGain(GRIPPER_RIGHT, 20, WRITE, 'd');
+  Dynamix.setEnableTorque(01, 01, 03);
+  Dynamix.setEnableTorque(02, 01, 03);
+  Dynamix.setEnableTorque(03, 01, 03);
+  Dynamix.setEnableTorque(04, 01, 03);
+  Dynamix.setEnableTorque(05, 01, 03);
 
 
-  Dynamix.setAccelerationProfile(JOINT_1, 100, WRITE);
-  Dynamix.setVelocityProfile(JOINT_1, 200, WRITE);
+  Dynamix.setGain(01, 600, 03, 'p');
+  Dynamix.setGain(01, 20, 03, 'i');
+  Dynamix.setGain(01, 20, 03, 'd');
 
-  Dynamix.setAccelerationProfile(JOINT_2, 50, WRITE);
-  Dynamix.setVelocityProfile(JOINT_2, 100, WRITE);
+  Dynamix.setGain(02, 600, 03, 'p');
+  Dynamix.setGain(02, 20, 03, 'i');
+  Dynamix.setGain(02, 20, 03, 'd');
 
-  Dynamix.setAccelerationProfile(JOINT_3, 20, WRITE);
-  Dynamix.setVelocityProfile(JOINT_3, 100, WRITE);
+  Dynamix.setGain(03, 600, 03, 'p');
+  Dynamix.setGain(03, 20, 03, 'i');
+  Dynamix.setGain(03, 20, 03, 'd');
 
-  Dynamix.setAccelerationProfile(GRIPPER_LEFT, 20, WRITE);
-  Dynamix.setVelocityProfile(GRIPPER_LEFT, 100, WRITE);
+  Dynamix.setGain(04, 600, 03, 'p');
+  Dynamix.setGain(04, 20, 03, 'i');
+  Dynamix.setGain(04, 20, 03, 'd');
 
-  Dynamix.setAccelerationProfile(GRIPPER_RIGHT, 20, WRITE);
-  Dynamix.setVelocityProfile(GRIPPER_RIGHT, 100, WRITE);
+  Dynamix.setGain(05, 600, 03, 'p');
+  Dynamix.setGain(05, 20, 03, 'i');
+  Dynamix.setGain(05, 20, 03, 'd');
 
-  Dynamix.setPosition(JOINT_1, 2047, REQ_WRITE);
+
+  Dynamix.setAccelerationProfile(01, 20, 03);
+  Dynamix.setVelocityProfile(01, 100, 03);
+
+  Dynamix.setAccelerationProfile(02, 20, 03);
+  Dynamix.setVelocityProfile(02, 100, 03);
+
+  Dynamix.setAccelerationProfile(03, 20, 03);
+  Dynamix.setVelocityProfile(03, 100, 03);
+
+  Dynamix.setAccelerationProfile(04, 20, 03);
+  Dynamix.setVelocityProfile(04, 100, 03);
+
+  Dynamix.setAccelerationProfile(05, 20, 03);
+  Dynamix.setVelocityProfile(05, 100, 03);
+
+  Dynamix.setPosition(01, 2047, 04);
   delay(2);
-  Dynamix.setPosition(JOINT_2, 3073, REQ_WRITE);
+  Dynamix.setPosition(02, 3073, 04);
   delay(2);
-  Dynamix.setPosition(JOINT_3, 2047, REQ_WRITE);
+  Dynamix.setPosition(03, 2047, 04);
   delay(2);
-  Dynamix.setPosition(GRIPPER_BOTH, 2047, REQ_WRITE);
+  Dynamix.setPosition(10, 2047, 04);
   delay(2);
-  gripperPos = 1;
   // Dynamix.setPosition(05, 2047, 04);
   delay(2);
   Dynamix.setAction(0xFE);
   delay(2000);
-
-  tft.reset(); // reset the display
-  tft.begin(0x9341); // start communication with the display on given address
-  pinMode(upButton, INPUT_PULLUP); // buttons for menu control
-  pinMode(downButton, INPUT_PULLUP);
-  pinMode(selectButton, INPUT_PULLUP);
-  tft.fillScreen(BLACK); //fill whole screen with color black (not required, but then the screen will flash with grey colors)
-  callibration(); // calibration function
-  tft.fillScreen(BLACK);
-  updateMenu(); // updating the switch menu state
-
+    tft.reset(); // reset the display
+    tft.begin(0x9341); // start communication with the display on given address
+    pinMode(upButton, INPUT_PULLUP); // buttons for menu control
+    pinMode(downButton, INPUT_PULLUP);
+    pinMode(selectButton, INPUT_PULLUP);
+    tft.fillScreen(BLACK); //fill whole screen with color black (not required, but then the screen will flash with grey colors)
+    callibration(); // calibration function
+    tft.fillScreen(BLACK);
+    updateMenu(); // updating the switch menu state
 }
 //Print main menu
 void PrintMainMenu() {
-  tft.setTextColor(WHITE);  tft.setTextSize(3); //set text color and text size
-  tft.setCursor(70, 35); // set cursor at x,y
+  tft.setTextColor(WHITE);  tft.setTextSize(3);
+  tft.setCursor(70, 35);
   tft.print(" Joint 1 ");
   tft.setCursor(70, 70);
   tft.print(" Joint 2 ");
   tft.setCursor(70, 105);
   tft.print(" Joint 3 ");
   tft.setCursor(70, 140);
-  tft.print(" Gripper ");
+  tft.print(" Gripper " );
   tft.setCursor(70, 175);
   tft.print(" Points ");
 }
 //Print sub menu
-void PrintSubMenu() { 
+void PrintSubMenu() {
   if (Point1State == true) {
     tft.setTextColor(GREEN);  tft.setTextSize(3);
     tft.setCursor(70, 35);
@@ -224,24 +217,15 @@ void PrintSubMenu() {
 //Print Pointer
 void printPointer() {
   tft.setTextColor(WHITE); tft.setTextSize(3);
-  tft.setCursor(40, PointerY[y]); //set cursor at x, y from array
+  tft.setCursor(40, PointerY[y]);
   tft.print("->");
 }
 
 void startup() {
   for (int i = 0; i < 10; i++) {
-    Dynamix.getPosition(JOINT_1);
-    delay(6);
-    Dynamix.getPosition(JOINT_2);
-    delay(6);
-    Dynamix.getPosition(JOINT_3);
-    delay(6);
-    Dynamix.getPosition(GRIPPER_LEFT);
-    delay(6);
-    Dynamix.getPosition(GRIPPER_RIGHT);
-    delay(6);
+    Dynamix.getPosition(02);
+    delay(10);
   }
-
 }
 
 // the menu, where only pointer moves
@@ -251,7 +235,7 @@ void updateMenu() {
   };
   switch (menu) {
     case 0:
-      tft.fillRect(40, 0, 33, 240, BLACK); //fill with black only the area, where the pointer is. numbers are x,y,wide,height
+      tft.fillRect(40, 0, 33, 240, BLACK);
       printPointer();
       break;
     case 1:
@@ -279,10 +263,10 @@ void execute() {  //the "select" function
     case 0:
       if (MainMenu == false) { //cheks if the user is in the main menu
 
-        if (Point1State == false) { // checks wheter or not the points "store" coordinates in them by only lokking at the Point#State
-          tft.setTextColor(RED);  tft.setTextSize(3); //sets the color and the text size
+        if (Point1State == false) { // checks wheter or not the points "store" coordinates in them
+          tft.setTextColor(RED);  tft.setTextSize(3); //sets the color, text size and the coordinates for the text location
           tft.setCursor(70, PointerY[y]);
-          tft.print(" Point 1 "); //print text on tft display
+          tft.print(" Point 1 "); //prints text to the screen, where "0" is ordinary print and "1" is println
           Point1State = true;
         }
         else if (Point1State == true) {
@@ -360,8 +344,7 @@ void execute() {  //the "select" function
       break;
   }
 }
-/*
-void calibration() { //not actually used yet
+void callibration() { //not actually used yet
   while (millis() < 5000)
   {
     tft.setTextColor(GREEN);  tft.setTextSize(2);
@@ -383,215 +366,171 @@ void calibration() { //not actually used yet
     tft.print(sensorValue);
   }
 }
-*/
-int XbeeMeter(double currentstate){
-  xbee.updateData();
-  
 
-  if(currentstate>720){
-
-    return 1;
-  }
-
-  
-
-  if(currentstate<320){
-    return -1;
-  }
-
-  else
-  {
-    return 0;
-
-  }
-  
-
-}
-int XbeeBuffer(int input){
-  int arr[30];
-  for (int i = 0; i< 30; i++) {
-  arr[i] = input;
-  Serial.print("string");
- Serial.println(arr[i]);
-      
-  }
-
-
-}
-
-
-
-void PrimeMover(int a){
-  const char Limb[]={JOINT_1,JOINT_2, JOINT_3};
-  int32_t joint = Dynamix.getPosition(Limb[a]);
-    int32_t sendjointN = joint - 40;
-    int32_t sendjointP = joint + 40;
-    delay(6);
-    if (digitalRead(10)) {
-      Dynamix.setPosition(Limb[a], sendjointN, WRITE);
-    while((sendjointN-10)>Dynamix.getPosition(Limb[a])){
-      Serial.println("Stuck in while loop");
-        delay(6);
-        }    
-    }
-    else if (digitalRead(11)) {
-      Dynamix.setPosition(Limb[a], sendjointP, WRITE);
-    while((sendjointP+10)<Dynamix.getPosition(Limb[a])){
-             delay(6);
+void moving(){
+  switch (menu)
+    {
+      case 0:
+        /* Joint 1 */
+        signed short joint1 = Dynamix.getPosition(01);
+        delay(2);
+        if (xbee.getEMG_CH1() > 100) {
+          Dynamix.setPosition(01, joint1 - 10, 03);
         }
-    }
-    else{
-      Dynamix.clearSerialBuffer(); 
-       }
-
-}
-
-void moving() {
-  if (menu == 0)
-  {
-    int32_t joint1 = Dynamix.getPosition(JOINT_1);
-    int32_t sendjointN1 = joint1 - 40;
-    int32_t sendjointP1 = joint1 + 40;
-    delay(6);
-    if (digitalRead(10)) {
-      Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
-    while((sendjointN1-10)>Dynamix.getPosition(JOINT_1)){
-        delay(6);
-        }    
-    }
-    else if (digitalRead(11)) {
-      Dynamix.setPosition(JOINT_1, sendjointP1, WRITE);
-    while((sendjointP1+10)<Dynamix.getPosition(JOINT_1)){
-             delay(6);
+        else if (xbee.getEMG_CH2() > 100) {
+          Dynamix.setPosition(01, joint1 + 10, 03);
         }
-    }
-    else{
-      Dynamix.clearSerialBuffer(); 
-       }
-   
+        break;
 
-   
+      case 1:
+        /* joint 2 */
+        signed short joint2 = Dynamix.getPosition(02);
+        delay(2);
+        if (xbee.getEMG_CH1() > 100) {
+          Dynamix.setPosition(02, joint2 - 10, 03);
+        }
+        else if (xbee.getEMG_CH2() > 100) {
+          Dynamix.setPosition(02, joint2 + 10, 03);
+        }
+        break;
 
+      case 2:
+        /* joint 3 */
+        signed short joint3 = Dynamix.getPosition(03);
+        delay(2);
+        if (xbee.getEMG_CH1() > 100) {
+          Dynamix.setPosition(03, joint3 - 10, 03);
+        }
+        else if (xbee.getEMG_CH2() > 100) {
+          Dynamix.setPosition(03, joint3 + 10, 03);
+        }
+        break;
 
-    
-  }
-  else if (menu == 1)
-  {
-    int32_t joint2 = Dynamix.getPosition(JOINT_2);
-    int32_t sendjointN2 = joint2 - 40;
-    int32_t sendjointP2 = joint2 + 40;
-    delay(6);
-    if (digitalRead(10)) {
-      Dynamix.setPosition(JOINT_2, sendjointN2, WRITE);
-      delay(90);
+      case 3:
+        /* gripper */
+        signed short gripper = Dynamix.getPosition(4);
+        delay(2);
+        if (gripper > 3000) {// gripper er open
+          Dynamix.setPosition(10, 2000, 03);
+        }
+        if (gripper < 2800) {// gripper er open
+          Dynamix.setPosition(10, 3100, 03);
+        }
+        break;
+
+      default:
+        break;
     }
-    else if (digitalRead(11)) {
-      Dynamix.setPosition(JOINT_2, sendjointP2, WRITE);
-      delay(90);
-    }
-  }
-  else if (menu == 2)
-  {
-    int32_t joint3 = Dynamix.getPosition(JOINT_3);
-    int32_t sendjointN3 = joint3 - 40;
-    int32_t sendjointP3 = joint3 + 40;
-    delay(6);
-    if (digitalRead(10)) {
-      Dynamix.setPosition(JOINT_3, sendjointN3, WRITE);
-      delay(90);
-    }
-    else if (digitalRead(11)) {
-      Dynamix.setPosition(JOINT_3, sendjointP3, WRITE);
-      delay(90);
-    }
-  }
-  else if (menu == 3)
-  {
-    int32_t gripper = Dynamix.getPosition(GRIPPER_LEFT);
-    int32_t gripperN = gripper - 30;
-    int32_t gripperP = gripper + 30;
-    delay(6);
-    if (digitalRead(10)) {
-      Dynamix.setPosition(GRIPPER_BOTH, gripperP, WRITE); // gripper opens
-      delay(6);
-      Serial.println(gripper);
-    }
-    else if (digitalRead(11)) {
-      Dynamix.setPosition(GRIPPER_BOTH, gripperN, WRITE); // gripper closes
-      delay(6);
-    }
-    
-  }
-  
 }
 void loop() {
   while (!Serial2) {}
   startup();
-  float hertz = 1000 / 1000;
+  float hertz = 1000 / 20;
   long old_time;
-
+  while (!Serial2) {}
+  startup();
+  bool runs = false;
+  bool runs1 = false;
   while (true) {
-
 
     old_time = millis();
 
-    //xbee.updateData();
+    xbee.updateData();
 
-    if (XbeeMeter(xbee.getAccY())==1) { // resting is around 560
-      menu++;
-      y++;
-      if (menu > 4) {
-        menu = 0;
-        y = 0;
+
+    if (digitalRead(31) == HIGH) {
+      /*     value = Dynamix.getPosition(02);
+           delay(5);
+           Serial.print(value);
+           Serial.print(" | ");
+           value = value - 20;
+           Dynamix.setPosition(02, value, 03);
+           delay(10);
+           Serial.println(Dynamix.getPosition(02));
+           //delay(1);}
+
+           Dynamix.setPosition(01, 3000, 04);
+           delay(2);
+           Dynamix.setPosition(02, 1600, 04);
+           delay(2);
+           Dynamix.setPosition(03, 1800, 04);
+           delay(2);
+           Dynamix.setPosition(10, 2047, 04);
+           delay(2);
+           // Dynamix.setPosition(05, 2047, 04);
+           delay(2);
+           Dynamix.setAction(0xFE);
+      */
+      if (runs == false) {
+
+        Dynamix.inverseKinematics(0.305, 0, -0.02037);
+        delay(10);
+        Serial.print("kører inverse");
+        runs = true;
       }
-      updateMenu();
+      delay(2000);
 
-    
-    while (XbeeMeter(xbee.getAccY())==1){
+      if (runs1 == false) {
 
-      delay(1);
-      Serial.println("in the while loop");
-     
+        Dynamix.inverseKinematics(0.305, 0.53, -0.026);
+        delay(10);
+        Serial.print("kører inverse");
+        runs1 = true;
       }
+      delay(2000);
+      runs1 = false;
+      runs = false;
+
+      while (millis() - old_time < hertz);
     }
-    
-    if (XbeeMeter(xbee.getAccY())==-1) { // resting is around 560
-      menu--;
-      y--;
-      if (menu < 0) {
-        menu = 4;
-        y = 4;
-      }
-      updateMenu();
-
-      delay(2);
-
-      while (XbeeMeter(xbee.getAccY())==-1){
-
-      delay(1);
-      Serial.println("in the while loop -1");
-     
-      }
-      
-    }
-    if (!digitalRead(selectButton)) { // resting is around 0
-      execute();
-      ///updateMenu();
-      delay(2);
-      while (!digitalRead(selectButton));
-    }
-
-   
-    //moving();
-//    if(Dynamix.getMoving(01)==0){
-//    while(Serial2.available()){
-//                             Serial2.read();
-//}}
-
-PrimeMover(menu);
-
-//Serial.println(XbeeMeter(xbee.getAccY()));
-
-    while (millis() - old_time < hertz);
   }
-}
+  //value = Dynamix.getPosition(02);
+  /*
+    if (digitalRead(31) == HIGH) {
+        value = Dynamix.getPosition(02);
+        delay(2);
+        //Serial.print(value);
+        //Serial.print(" | ");
+        value =-10;
+        Dynamix.setPosition(02, value, 03);
+        delay(10);
+        //Serial.println(Dynamix.getPosition(02));
+    //Serial.println(value);
+    }*/
+
+
+  
+    //if (!digitalRead(downButton)){
+    if (xbee.getAccY() > 600){ // resting is around 560
+
+    menu++;
+    y++;
+    if (menu>4){
+    menu=0;
+    y = 0;
+    }
+    updateMenu();
+    moving();
+    //delay(50);
+    //while (!digitalRead(downButton));
+    }
+    if (xbee.getAccY() < 500){ // resting is around 560
+    menu--;
+    y--;
+    if (menu<0){
+     menu=4;
+     y = 4;
+    }
+    updateMenu();
+    moving();
+    delay(2);
+    //while (!digitalRead(upButton));
+    }
+    if (xbee.getEMG_CH1() > 100){ // resting is around 0
+    execute();
+    ///updateMenu();
+    delay(2);
+    while (!digitalRead(selectButton));
+    }
+      while (millis() - old_time < hertz);   
+  } 

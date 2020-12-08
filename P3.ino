@@ -1,4 +1,4 @@
-#include "src/libs/EMG_Lib/EMG.h"
+  #include "src/libs/EMG_Lib/EMG.h"
 #include "src/libs/IntervalTimer/IntervalTimer.h"
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
 #include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
@@ -36,7 +36,7 @@ Dynamixelclass Dynamix;
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
 // controlling buttons
-int upButton = 52; 
+int upButton = 52;
 int downButton = 53;
 int selectButton = 51;
 int menu = 0; //menu value for switch
@@ -52,7 +52,10 @@ int sensorMax = 0; // same as above
 int sensorValue = 0; // accelerometer input
 int PointerY[5] = {35, 70, 105, 140, 170}; // array with y coordinates for pointer
 int gripperPos = 0; // 0=open, 1=closed
-
+int potPin1 = A15; //potentiometer på kanal 1
+int potPin2 = A14; //potentiometer på kanal 2
+int val1 = 0;
+int val2 = 0;
 
 void setup() {
   pinMode(10, INPUT);
@@ -162,20 +165,34 @@ void setup() {
 }
 //Print main menu
 void PrintMainMenu() {
-  tft.setTextColor(WHITE);  tft.setTextSize(3); //set text color and text size
-  tft.setCursor(70, 35); // set cursor at x,y
+  tft.setTextColor(WHITE);  tft.setTextSize(3);
+  tft.setCursor(70, 35);
   tft.print(" Joint 1 ");
   tft.setCursor(70, 70);
   tft.print(" Joint 2 ");
   tft.setCursor(70, 105);
   tft.print(" Joint 3 ");
   tft.setCursor(70, 140);
-  tft.print(" Gripper ");
+  tft.print(" Gripper " );
   tft.setCursor(70, 175);
   tft.print(" Points ");
+ 
+    while (true)
+    {
+      tft.setCursor(70, 210);
+      tft.fillRect(70, 210, 70, 80, BLACK);
+      xbee.updateData();
+      val1 = analogRead(potPin1);
+      tft.print(val1);
+      tft.setCursor(70, 245);
+      val2 = analogRead(potPin2);
+      tft.print(val2);
+      delay(1);
+      delay(500);
+    }
 }
 //Print sub menu
-void PrintSubMenu() { 
+void PrintSubMenu() {
   if (Point1State == true) {
     tft.setTextColor(GREEN);  tft.setTextSize(3);
     tft.setCursor(70, 35);
@@ -224,7 +241,7 @@ void PrintSubMenu() {
 //Print Pointer
 void printPointer() {
   tft.setTextColor(WHITE); tft.setTextSize(3);
-  tft.setCursor(40, PointerY[y]); //set cursor at x, y from array
+  tft.setCursor(40, PointerY[y]);
   tft.print("->");
 }
 
@@ -251,7 +268,7 @@ void updateMenu() {
   };
   switch (menu) {
     case 0:
-      tft.fillRect(40, 0, 33, 240, BLACK); //fill with black only the area, where the pointer is. numbers are x,y,wide,height
+      tft.fillRect(40, 0, 33, 240, BLACK);
       printPointer();
       break;
     case 1:
@@ -279,10 +296,10 @@ void execute() {  //the "select" function
     case 0:
       if (MainMenu == false) { //cheks if the user is in the main menu
 
-        if (Point1State == false) { // checks wheter or not the points "store" coordinates in them by only lokking at the Point#State
-          tft.setTextColor(RED);  tft.setTextSize(3); //sets the color and the text size
+        if (Point1State == false) { // checks wheter or not the points "store" coordinates in them
+          tft.setTextColor(RED);  tft.setTextSize(3); //sets the color, text size and the coordinates for the text location
           tft.setCursor(70, PointerY[y]);
-          tft.print(" Point 1 "); //print text on tft display
+          tft.print(" Point 1 "); //prints text to the screen, where "0" is ordinary print and "1" is println
           Point1State = true;
         }
         else if (Point1State == true) {
@@ -360,8 +377,7 @@ void execute() {  //the "select" function
       break;
   }
 }
-/*
-void calibration() { //not actually used yet
+void callibration() { //not actually used yet
   while (millis() < 5000)
   {
     tft.setTextColor(GREEN);  tft.setTextSize(2);
@@ -383,28 +399,21 @@ void calibration() { //not actually used yet
     tft.print(sensorValue);
   }
 }
-*/
+
 int XbeeMeter(double currentstate){
   xbee.updateData();
   
-
   if(currentstate>720){
-
     return 1;
   }
-
-  
 
   if(currentstate<320){
     return -1;
   }
 
-  else
-  {
+  else{
     return 0;
-
   }
-  
 
 }
 int XbeeBuffer(int input){
@@ -452,6 +461,7 @@ void moving() {
     int32_t joint1 = Dynamix.getPosition(JOINT_1);
     int32_t sendjointN1 = joint1 - 40;
     int32_t sendjointP1 = joint1 + 40;
+
     delay(6);
     if (digitalRead(10)) {
       Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
@@ -531,8 +541,9 @@ void loop() {
   long old_time;
 
   while (true) {
-
-
+    val1 = analogRead(potPin1);
+    val2 = analogRead(potPin2);
+    
     old_time = millis();
 
     //xbee.updateData();

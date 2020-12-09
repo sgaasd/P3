@@ -8,7 +8,7 @@ void EMGclass::begin(HardwareSerial &Serial, uint32_t baudRate){ // turns on the
 }
 
 void EMGclass::updateData(){ //update the value of accelerometer and emg channel if checksum is verified
-    static const int16_t numReadings = 100;
+    static const int16_t numReadings = 10;
     int16_t readingsX[numReadings];      // the readings from the input
     int16_t readingsY[numReadings];      // the readings from the input
     int16_t readingsZ[numReadings];      // the readings from the input
@@ -36,7 +36,7 @@ void EMGclass::updateData(){ //update the value of accelerometer and emg channel
                     XBEE.ACC.y = (dataPkg[15] << 8) + dataPkg[16];
                     XBEE.ACC.z = (dataPkg[17] << 8) + dataPkg[18];
 
-                    CH1 = (dataPkg[19] << 8) + dataPkg[20];
+                    XBEE.EMG.CH1 = (dataPkg[19] << 8) + dataPkg[20];
                     XBEE.EMG.CH2 = (dataPkg[21] << 8) + dataPkg[22];
 
                     // subtract the last reading:
@@ -72,7 +72,7 @@ void EMGclass::updateData(){ //update the value of accelerometer and emg channel
                 //    XBEE.ACC.x = (totalX / numReadings);
                 //    XBEE.ACC.y = (totalY / numReadings);
                 //    XBEE.ACC.z = (totalZ / numReadings);
-                    XBEE.EMG.CH1 = (totalCH1 / numReadings);
+                //    XBEE.EMG.CH1 = (totalCH1 / numReadings);
                 //    XBEE.EMG.CH2 = (totalCH2 / numReadings);
 				}
             }

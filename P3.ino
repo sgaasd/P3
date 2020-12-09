@@ -430,23 +430,20 @@ int XbeeBuffer(int input){
 
 
 
-void PrimeMover(int a){
+void PrimeMover(int a, int state){
   const char Limb[]={JOINT_1,JOINT_2, JOINT_3};
-    int32_t joint = Dynamix.getPosition(Limb[a]);
+  int32_t joint = Dynamix.getPosition(Limb[a]);
     int32_t sendjointN = joint - 40;
     int32_t sendjointP = joint + 40;
-    xbee.updateData();
     delay(6);
-    val1 = analogRead(potPin1);
-    val2 = analogRead(potPin2);
-    if (val1 > 100) {
+    if (state==1) {
       Dynamix.setPosition(Limb[a], sendjointN, WRITE);
     while((sendjointN-10)>Dynamix.getPosition(Limb[a])){
-      //Serial.println("Stuck in while loop");
+      Serial.println("Stuck in while loop");
         delay(6);
         }    
     }
-    else if (val2 > 100) {
+    else if (digitalRead(11)) {
       Dynamix.setPosition(Limb[a], sendjointP, WRITE);
     while((sendjointP+10)<Dynamix.getPosition(Limb[a])){
              delay(6);
@@ -455,6 +452,8 @@ void PrimeMover(int a){
     else{
       Dynamix.clearSerialBuffer(); 
        }
+
+}
 
 
 /*
@@ -536,6 +535,23 @@ void moving() {
     
   }
   */
+int Emg(int16_t signal)
+{
+  if(signal > 1024){
+    return 0;
+  } 
+
+  if(signal>50){
+    return 1;
+  }
+
+  if(signal<50){
+    return 0;
+  }
+
+
+}
+
 }
 void loop() {
   while (!Serial2) {}
@@ -601,7 +617,7 @@ void loop() {
 //                             Serial2.read();
 //}}
 
-PrimeMover(menu);
+PrimeMover(menu,Emg(xbee.getEMG_CH1()));
 
 //Serial.println(XbeeMeter(xbee.getAccY()));
 

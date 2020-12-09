@@ -309,8 +309,9 @@ void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsig
     clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
-
+sss
 */
+
 void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
     signed short val = setVal;
  
@@ -332,7 +333,6 @@ void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsig
     //clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
-
 // Function For setting the Operation mode of the motor
 // -------------------------------------------------------
 // MOTOR_ID -> specify the motor to communicate with, by inserting the ID number

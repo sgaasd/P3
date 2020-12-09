@@ -139,15 +139,10 @@ void setup() {
   Dynamix.setVelocityProfile(GRIPPER_RIGHT, 100, WRITE);
 
   Dynamix.setPosition(JOINT_1, 2047, REQ_WRITE);
-  delay(2);
-  Dynamix.setPosition(JOINT_2, 3073, REQ_WRITE);
-  delay(2);
+  //Dynamix.setPosition(JOINT_2, 3073, REQ_WRITE);
+  Dynamix.setPosition(JOINT_2, 2500, REQ_WRITE);// brugt til test - skal slettes
   Dynamix.setPosition(JOINT_3, 2047, REQ_WRITE);
-  delay(2);
   Dynamix.setPosition(GRIPPER_BOTH, 2047, REQ_WRITE);
-  delay(2);
-  gripperPos = 1;
-  // Dynamix.setPosition(05, 2047, 04);
   delay(2);
   Dynamix.setAction(0xFE);
   delay(2000);
@@ -158,8 +153,6 @@ void setup() {
   pinMode(downButton, INPUT_PULLUP);
   pinMode(selectButton, INPUT_PULLUP);
   tft.fillScreen(BLACK); //fill whole screen with color black (not required, but then the screen will flash with grey colors)
-  callibration(); // calibration function
-  tft.fillScreen(BLACK);
   updateMenu(); // updating the switch menu state
 
 }
@@ -176,21 +169,6 @@ void PrintMainMenu() {
   tft.print(" Gripper " );
   tft.setCursor(70, 175);
   tft.print(" Points ");
- 
-    /*  while (true)
-    {
-      tft.setCursor(70, 210);
-      tft.fillRect(70, 210, 70, 80, BLACK);
-      xbee.updateData();
-      val1 = analogRead(potPin1);
-      tft.print(val1);
-      tft.setCursor(70, 245);
-      val2 = analogRead(potPin2);
-      tft.print(val2);
-      delay(1);
-      delay(500);
-    }
-    */
 }
 //Print sub menu
 void PrintSubMenu() {
@@ -378,28 +356,6 @@ void execute() {  //the "select" function
       break;
   }
 }
-void callibration() { //not actually used yet
-  while (millis() < 5000)
-  {
-    tft.setTextColor(GREEN);  tft.setTextSize(2);
-    tft.setCursor(70, PointerY[y]);
-    tft.print(" Shake ur head along X-axis");
-    xbee.updateData();
-    sensorValue = xbee.getAccX(); //sets the sensorValue to the input from the accelerometer
-    Serial.println(sensorValue); // just to display the resulting number
-    if (sensorValue > sensorMax) { // record the maximum sensor value
-      sensorMax = sensorValue;
-    }
-    if (sensorValue < sensorMin) {// record the minimum sensor value
-      sensorMin = sensorValue;
-    }
-
-    sensorValue = map(sensorValue, sensorMin, sensorMax, 0, 255);
-    tft.setTextColor(GREEN);  tft.setTextSize(2);
-    tft.setCursor(70, PointerY[y]);
-    tft.print(sensorValue);
-  }
-}
 int XbeeMeter(double currentstate){
   xbee.updateData();
   
@@ -428,26 +384,41 @@ int XbeeBuffer(int input){
 
 }
 
-
-
 void PrimeMover(int a, int state){
   const char Limb[]={JOINT_1,JOINT_2, JOINT_3};
   int32_t joint = Dynamix.getPosition(Limb[a]);
     int32_t sendjointN = joint - 40;
     int32_t sendjointP = joint + 40;
     delay(6);
-    if (state==1) {
+    xbee.updateData();
+    val1 = xbee.getEMG_CH1();
+    val2 = xbee.getEMG_CH2();
+    Serial.println(val1);
+    if (val1 > 50) {
+      Serial.println(val1);
+      joint = Dynamix.getPosition(Limb[a]);
+      sendjointN = joint - 40;
+      delay(6);
       Dynamix.setPosition(Limb[a], sendjointN, WRITE);
-    while((sendjointN-10)>Dynamix.getPosition(Limb[a])){
-      Serial.println("Stuck in while loop");
-        delay(6);
-        }    
+      delay(6);
+      xbee.updateData();
+      val1 = xbee.getEMG_CH1();
+      //int32_t jointx = Dynamix.getPosition(Limb[a]); 
     }
-    else if (digitalRead(11)) {
+    else if (val2 > 1000) {
+      Serial.println(val1);
+      joint = Dynamix.getPosition(Limb[a]);
+      sendjointN = joint - 40;
+      delay(6);
       Dynamix.setPosition(Limb[a], sendjointP, WRITE);
-    while((sendjointP+10)<Dynamix.getPosition(Limb[a])){
+      delay(6);
+      xbee.updateData();
+      val1 = xbee.getEMG_CH1();
+      //int32_t jointx = Dynamix.getPosition(Limb[a]); 
+      //Dynamix.setPosition(Limb[a], sendjointP, WRITE);
+    /*while((sendjointP+10)<Dynamix.getPosition(Limb[a])){
              delay(6);
-        }
+        }*/
     }
     else{
       Dynamix.clearSerialBuffer(); 
@@ -541,7 +512,7 @@ int Emg(int16_t signal)
     return 0;
   } 
 
-  if(signal>50){
+  if(signal>200){
     return 1;
   }
 
@@ -552,7 +523,7 @@ int Emg(int16_t signal)
 
 }
 
-}
+
 void loop() {
   while (!Serial2) {}
   startup();
@@ -560,10 +531,7 @@ void loop() {
   long old_time;
 
   while (true) {
-
-    
     old_time = millis();
-
     xbee.updateData();
 
     if (XbeeMeter(xbee.getAccY())==1) { // resting is around 560
@@ -611,15 +579,9 @@ void loop() {
     }
 
    
-    //moving();
-//    if(Dynamix.getMoving(01)==0){
-//    while(Serial2.available()){
-//                             Serial2.read();
-//}}
 
-PrimeMover(menu,Emg(xbee.getEMG_CH1()));
-
-//Serial.println(XbeeMeter(xbee.getAccY()));
+    xbee.updateData();
+    PrimeMover(menu,Emg(xbee.getEMG_CH1()));
 
     while (millis() - old_time < hertz);
   }

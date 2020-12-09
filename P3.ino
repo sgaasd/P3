@@ -177,7 +177,7 @@ void PrintMainMenu() {
   tft.setCursor(70, 175);
   tft.print(" Points ");
  
-    while (true)
+    /*  while (true)
     {
       tft.setCursor(70, 210);
       tft.fillRect(70, 210, 70, 80, BLACK);
@@ -190,6 +190,7 @@ void PrintMainMenu() {
       delay(1);
       delay(500);
     }
+    */
 }
 //Print sub menu
 void PrintSubMenu() {
@@ -399,7 +400,6 @@ void callibration() { //not actually used yet
     tft.print(sensorValue);
   }
 }
-
 int XbeeMeter(double currentstate){
   xbee.updateData();
   
@@ -432,18 +432,21 @@ int XbeeBuffer(int input){
 
 void PrimeMover(int a){
   const char Limb[]={JOINT_1,JOINT_2, JOINT_3};
-  int32_t joint = Dynamix.getPosition(Limb[a]);
+    int32_t joint = Dynamix.getPosition(Limb[a]);
     int32_t sendjointN = joint - 40;
     int32_t sendjointP = joint + 40;
+    xbee.updateData();
     delay(6);
-    if (digitalRead(10)) {
+    val1 = analogRead(potPin1);
+    val2 = analogRead(potPin2);
+    if (val1 > 100) {
       Dynamix.setPosition(Limb[a], sendjointN, WRITE);
     while((sendjointN-10)>Dynamix.getPosition(Limb[a])){
-      Serial.println("Stuck in while loop");
+      //Serial.println("Stuck in while loop");
         delay(6);
         }    
     }
-    else if (digitalRead(11)) {
+    else if (val2 > 100) {
       Dynamix.setPosition(Limb[a], sendjointP, WRITE);
     while((sendjointP+10)<Dynamix.getPosition(Limb[a])){
              delay(6);
@@ -453,8 +456,8 @@ void PrimeMover(int a){
       Dynamix.clearSerialBuffer(); 
        }
 
-}
 
+/*
 void moving() {
   if (menu == 0)
   {
@@ -532,7 +535,7 @@ void moving() {
     }
     
   }
-  
+  */
 }
 void loop() {
   while (!Serial2) {}
@@ -541,12 +544,11 @@ void loop() {
   long old_time;
 
   while (true) {
-    val1 = analogRead(potPin1);
-    val2 = analogRead(potPin2);
+
     
     old_time = millis();
 
-    //xbee.updateData();
+    xbee.updateData();
 
     if (XbeeMeter(xbee.getAccY())==1) { // resting is around 560
       menu++;

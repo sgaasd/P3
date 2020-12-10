@@ -84,12 +84,30 @@ float Dynamixelclass::getPositionDegree(unsigned char MOTOR_ID){
   posd = (float)getPosition(MOTOR_ID)*0.088;
   return posd;
 }
+// MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
+double Dynamixelclass::getPositionRadians(unsigned char MOTOR_ID){
+    if(MOTOR_ID==0x01){
+        double pos1=((double)getPosition(MOTOR_ID)-2047)*0.001534;
+    return pos1;
+    }
+
+    if(MOTOR_ID==0x02){
+        double pos2=((double)getPosition(MOTOR_ID)-3073)*0.001534;
+    return pos2;
+    }
+
+    if(MOTOR_ID==0x03){
+        double pos3=((double)getPosition(MOTOR_ID)-2047)*0.001534;
+    return pos3;
+    }
+
+}
 
 // Function to get the velocity at a desired motor
 // -------------------------------------------------------
 // MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
-int32_t Dynamixelclass::getVelocity(unsigned char MOTOR_ID){
-    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x80, 0x00, 0x02, 0x00, 0, 0};
+double Dynamixelclass::getVelocity(unsigned char MOTOR_ID){
+    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x07, 0x00, 0x02, 0x80, 0x00, 0x04, 0x00, 0, 0};
     unsigned short len = sizeof(Arr)-2;
     unsigned short crc = update_crc(Arr, len); 
     unsigned char CRC_L = (crc & 0x00FF);
@@ -102,7 +120,19 @@ int32_t Dynamixelclass::getVelocity(unsigned char MOTOR_ID){
     rArr = sendNreadPacket(Arr, sizeof(Arr));  
     //Bitwize OR operation, bit shifting 8 bits, and then adding them together
 	int32_t result =(rArr[9] | rArr[10] << 8 ); 
-    return result; 
+    
+    int32_t con=result;
+    return con;
+; 
+}
+
+double Dynamixelclass::getVelocityRadians(unsigned char MOTOR_ID){
+double vel=getVelocity(MOTOR_ID)*0.02398082389;
+
+return vel;
+
+
+
 }
 
 // Function to get the Pulse Width Modulation(PWM) for a desired motor
@@ -290,27 +320,6 @@ void Dynamixelclass::setPositionDegree(unsigned char MOTOR_ID, float setVal, uns
 // MOTOR_ID -> specify the motor to communicate with, by inserting the ID number
 // setVal -> input the PWM value the motor shall have
 // setIntruction -> set the instruction to send - 0x03(WRITE) or 0x04(REQ_WRITE) 
-/*
-void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
-    unsigned short val = setVal;
-    unsigned char val_H = (val & 0x00FF);
-    unsigned char val_L = (val>>8) & 0x00FF;
-
-    unsigned char Arr[14]={0xFF, 0xFF, 0xFD, 0x00, MOTOR_ID, 0x09, 0x00, setIntruction, 0x64, 0x00, val_L, val_H, 0, 0};
-    unsigned short len = sizeof(Arr)-2;
-    unsigned short crc = update_crc(Arr, len);
-    unsigned char CRC_L = (crc & 0x00FF);
-    unsigned char CRC_H = (crc>>8) & 0x00FF;
-
-    Arr[12]=CRC_L;
-    Arr[13]=CRC_H;
-
-    // clears the serial buffer before sending information to Dynamixel
-    clearSerialBuffer();
-    sendPacket(Arr, sizeof(Arr));
-}
-sss
-*/
 
 void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction){
     signed short val = setVal;
@@ -333,6 +342,7 @@ void Dynamixelclass::setPWM(unsigned char MOTOR_ID, unsigned short setVal, unsig
     //clearSerialBuffer();
     sendPacket(Arr, sizeof(Arr));
 }
+
 // Function For setting the Operation mode of the motor
 // -------------------------------------------------------
 // MOTOR_ID -> specify the motor to communicate with, by inserting the ID number

@@ -4,7 +4,20 @@
 #include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
 #include "src/libs/movingAvg/movingAvg.h"
 
-movingAvg avg(1);
+movingAvg avg(5);
+
+// dette er til test af emg mean
+const byte filter_size = 10;
+const uint32_t input_thres[3] = {490, 50, 50};
+uint32_t filter[3][filter_size] = {0};
+int32_t filt_value[3] = {0};
+uint32_t mean[3] = {0};
+double activeTime[2] = {0};
+bool activeEMG[2] = {0};
+const uint32_t activeTimeThresh = 50; //ms
+const uint32_t activeTimeFrequency = 1000;
+double activeTimeCooldown = 0;
+volatile byte EMG_state = 0;
 
 #define LCD_CS A3
 #define LCD_CD A2
@@ -362,7 +375,6 @@ void execute() {  //the "select" function
 }
 int XbeeMeter(double currentstate){
   xbee.updateData();
-  
   if(currentstate>650){
     return 1;
   }
@@ -388,17 +400,41 @@ int XbeeBuffer(int input){
 
 }
 
+void EMG(){
+  xbee.updateData();
+  checkEmgInput();
+}
+
+void checkEmgInput() {
+  uint32_t input[3] = {xbee.getAccY(), xbee.getEMG_CH1(), xbee.getEMG_CH2()}; // Gets the values from the accelerometer and EMG value
+  static byte filt_index = 0; // Is used to index the filter array to store the input values
+  filt_index++; // Increments to index next filter element
+  filt_index = (filt_index < filter_size ? filt_index : 0); // Gets reset if the filt_index has exceeded the number of elements in the filter array
+
+  for(byte i = 0; i < 3; i++) // Resets if the input is above the maximum value (this has fixed an important bug, don't touch!)
+    input[i] = (input[i] < 1023 ? input[i] : 0);
+
+  for(byte i = 0; i < 3; i++){ // Saves the inputs in the filter array and calculates the new means
+    filt_value[i] = filt_value[i] + input[i] - filter[i][filt_index]; // Removes the oldest data and inserts the new into filt_value. Filt_value holds all values from the filter
+    filter[i][filt_index] = input[i]; // Saves the new data
+    
+    mean[i] = filt_value[i] / filter_size; // Mean is calculated
+  }
+}
+
 void PrimeMover(int a, int state){
-  const char Limb[]={JOINT_1,JOINT_2, JOINT_3};
+  const char Limb[4]={JOINT_1,JOINT_2, JOINT_3};
   int32_t joint = Dynamix.getPosition(Limb[a]);
     int32_t sendjointN = joint - 40;
     int32_t sendjointP = joint + 40;
     delay(6);
-    xbee.updateData();
-    int32_t val1 = avg.reading(xbee.getEMG_CH1());    // calculate the moving average
+    //EMG();
+    int32_t val1 = mean[1];    // calculate the moving average
     val2 = xbee.getEMG_CH2();
-    Serial.println(val1);
-    if (val1 > 900) {
+    Serial.println(mean[1]);
+
+    if (val1 > 250) {
+      if (a == 0 || a == 1 || a == 2){
       joint = Dynamix.getPosition(Limb[a]);
       sendjointN = joint - 40;
       delay(6);
@@ -406,6 +442,16 @@ void PrimeMover(int a, int state){
       delay(6);
       val1 = xbee.getEMG_CH1();
       }
+      else if (a == 3)
+      {
+      joint = Dynamix.getPosition(GRIPPER_LEFT);
+      sendjointN = joint - 40;
+      delay(6);
+      Dynamix.setPosition(GRIPPER_BOTH, sendjointN, WRITE);
+      delay(6);
+      val1 = xbee.getEMG_CH1();
+      }
+    }
 
     else if (val2 > 500000) {
       //Serial.println(val1);
@@ -425,6 +471,8 @@ void PrimeMover(int a, int state){
     else{
       Dynamix.clearSerialBuffer(); 
        }
+
+
 
 }
 
@@ -454,7 +502,7 @@ void loop() {
 
   while (true) {
     old_time = millis();
-    xbee.updateData();
+    EMG();
 
     if (XbeeMeter(xbee.getAccY())==1) { // resting is around 560
       menu++;
@@ -505,6 +553,6 @@ void loop() {
     //xbee.updateData();
     PrimeMover(menu,Emg(xbee.getEMG_CH1()));
 
-    while (millis() - old_time < hertz);
+    //while (millis() - old_time < hertz);
   }
 }

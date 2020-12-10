@@ -32,11 +32,13 @@ public:
 
     int32_t getPosition(unsigned char MOTOR_ID);
     float getPositionDegree(unsigned char MOTOR_ID);
-    int32_t getVelocity(unsigned char MOTOR_ID);
+    double getVelocity(unsigned char MOTOR_ID);
     int32_t getPWM(unsigned char MOTOR_ID);
     int32_t getGain(unsigned char MOTOR_ID, char setControllerGain);
     int32_t getMovingstatus(unsigned char MOTOR_ID);
     bool getMoving(unsigned char MOTOR_ID);
+    double getVelocityRadians(unsigned char MOTOR_ID);
+    double getPositionRadians(unsigned char MOTOR_ID);
 
     void setGain(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction, char setControllerGain);
     void setPosition(unsigned char MOTOR_ID, signed short setVal, unsigned char setIntruction);
@@ -50,7 +52,7 @@ public:
     void setStatusReturnLevel(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setMaxPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setMinPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
-    double Dynamixelclass::getVelocityRadians(unsigned char MOTOR_ID);
+    
     void inverseKinematics(double x, double y, double z);
     void forwardKinematics(int32_t JOINT_1, int32_t JOINT_2, int32_t JOINT_3, int savePointNo);
 

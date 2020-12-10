@@ -7,13 +7,14 @@ void EMGclass::begin(HardwareSerial &Serial, uint32_t baudRate){ // turns on the
     XBEEserial->begin(baudRate);
 }
 
+
 void EMGclass::updateData(){ //update the value of accelerometer and emg channel if checksum is verified
     static const int16_t numReadings = 100;
-    int16_t readingsX[numReadings];      // the readings from the input
-    int16_t readingsY[numReadings];      // the readings from the input
-    int16_t readingsZ[numReadings];      // the readings from the input
-    int16_t readingsCH1[numReadings];      // the readings from the input
-    int16_t readingsCH2[numReadings];      // the readings from the input
+    uint16_t readingsX[numReadings];      // the readings from the input
+    uint16_t readingsY[numReadings];      // the readings from the input
+    uint16_t readingsZ[numReadings];      // the readings from the input
+    uint16_t readingsCH1[numReadings];      // the readings from the input
+    uint16_t readingsCH2[numReadings];      // the readings from the input
 
     
     while (XBEEserial->available()) { //check incoming data
@@ -32,12 +33,12 @@ void EMGclass::updateData(){ //update the value of accelerometer and emg channel
                 }
 
                 if(checkSum == 255){
-                    XBEE.ACC.x = (dataPkg[13] << 8) + dataPkg[14];
+                    Z = (dataPkg[13] << 8) + dataPkg[14];
                     XBEE.ACC.y = (dataPkg[15] << 8) + dataPkg[16];
-                    XBEE.ACC.z = (dataPkg[17] << 8) + dataPkg[18];
+                    X = (dataPkg[17] << 8) + dataPkg[18];
 
-                    CH1 = (dataPkg[19] << 8) + dataPkg[20];
-                    XBEE.EMG.CH2 = (dataPkg[21] << 8) + dataPkg[22];
+                    XBEE.EMG.CH1 = (dataPkg[19] << 8) + dataPkg[20];
+                    CH2 = (dataPkg[21] << 8) + dataPkg[22];
 
                     // subtract the last reading:
                     totalX = totalX - readingsX[readIndex];
@@ -69,35 +70,35 @@ void EMGclass::updateData(){ //update the value of accelerometer and emg channel
                         readIndex = 0;
                     }
                     // calculate the average:
-                //    XBEE.ACC.x = (totalX / numReadings);
-                //    XBEE.ACC.y = (totalY / numReadings);
-                //    XBEE.ACC.z = (totalZ / numReadings);
-                    XBEE.EMG.CH1 = (totalCH1 / numReadings);
-                //    XBEE.EMG.CH2 = (totalCH2 / numReadings);
+                    XBEE.ACC.x = (totalX / numReadings);
+                   // XBEE.ACC.y = (totalY / numReadings);
+                    XBEE.ACC.z = (totalZ / numReadings);
+                   // XBEE.EMG.CH1 = (totalCH1 / numReadings);
+                    XBEE.EMG.CH2 = (totalCH2 / numReadings);
 				}
             }
         }
     }   
 }
 
-int16_t EMGclass::getEMG_CH1(){ //Return value of EMG CH 1
+uint16_t EMGclass::getEMG_CH1(){ //Return value of EMG CH 1
     return XBEE.EMG.CH1;
 }
 
-int16_t EMGclass::getEMG_CH2(){ //Return value of EMG CH 2
+uint16_t EMGclass::getEMG_CH2(){ //Return value of EMG CH 2
     return XBEE.EMG.CH2;
 }
 
 
-int16_t EMGclass::getAccX(){ //Return the acceleration in x-axis
+uint16_t EMGclass::getAccX(){ //Return the acceleration in x-axis
     return XBEE.ACC.x;
 }
 
-int16_t EMGclass::getAccY(){ //Return the acceleration in y-axis
+uint16_t EMGclass::getAccY(){ //Return the acceleration in y-axis
     return XBEE.ACC.y;
 }
 
-int16_t EMGclass::getAccZ(){ //Return the acceleration in z-axis
+uint16_t EMGclass::getAccZ(){ //Return the acceleration in z-axis
     return XBEE.ACC.z;
 }
 

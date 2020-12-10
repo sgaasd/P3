@@ -1,7 +1,10 @@
-  #include "src/libs/EMG_Lib/EMG.h"
+#include "src/libs/EMG_Lib/EMG.h"
 #include "src/libs/IntervalTimer/IntervalTimer.h"
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
 #include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
+#include "src/libs/movingAvg/movingAvg.h"
+
+movingAvg avg(1);
 
 #define LCD_CS A3
 #define LCD_CD A2
@@ -58,6 +61,7 @@ int val1 = 0;
 int val2 = 0;
 
 void setup() {
+  avg.begin();
   pinMode(10, INPUT);
   pinMode(11, INPUT);
   Serial.begin(9600);
@@ -359,7 +363,7 @@ void execute() {  //the "select" function
 int XbeeMeter(double currentstate){
   xbee.updateData();
   
-  if(currentstate>720){
+  if(currentstate>650){
     return 1;
   }
 
@@ -376,8 +380,8 @@ int XbeeBuffer(int input){
   int arr[30];
   for (int i = 0; i< 30; i++) {
   arr[i] = input;
-  Serial.print("string");
- Serial.println(arr[i]);
+  //Serial.print("string");
+ //Serial.println(arr[i]);
       
   }
 
@@ -391,28 +395,26 @@ void PrimeMover(int a, int state){
     int32_t sendjointP = joint + 40;
     delay(6);
     xbee.updateData();
-    val1 = xbee.getEMG_CH1();
+    int32_t val1 = avg.reading(xbee.getEMG_CH1());    // calculate the moving average
     val2 = xbee.getEMG_CH2();
     Serial.println(val1);
-    if (val1 > 50) {
-      Serial.println(val1);
+    if (val1 > 900) {
       joint = Dynamix.getPosition(Limb[a]);
       sendjointN = joint - 40;
       delay(6);
       Dynamix.setPosition(Limb[a], sendjointN, WRITE);
       delay(6);
-      xbee.updateData();
       val1 = xbee.getEMG_CH1();
-      //int32_t jointx = Dynamix.getPosition(Limb[a]); 
-    }
-    else if (val2 > 1000) {
-      Serial.println(val1);
+      }
+
+    else if (val2 > 500000) {
+      //Serial.println(val1);
       joint = Dynamix.getPosition(Limb[a]);
       sendjointN = joint - 40;
       delay(6);
       Dynamix.setPosition(Limb[a], sendjointP, WRITE);
       delay(6);
-      xbee.updateData();
+      ///////////xbee.updateData();
       val1 = xbee.getEMG_CH1();
       //int32_t jointx = Dynamix.getPosition(Limb[a]); 
       //Dynamix.setPosition(Limb[a], sendjointP, WRITE);
@@ -426,86 +428,6 @@ void PrimeMover(int a, int state){
 
 }
 
-
-/*
-void moving() {
-  if (menu == 0)
-  {
-    int32_t joint1 = Dynamix.getPosition(JOINT_1);
-    int32_t sendjointN1 = joint1 - 40;
-    int32_t sendjointP1 = joint1 + 40;
-
-    delay(6);
-    if (analogRead(potPin1)) {
-      Dynamix.setPosition(JOINT_1, sendjointN1, WRITE);
-    while((sendjointN1-10)>Dynamix.getPosition(JOINT_1)){
-        delay(6);
-        }    
-    }
-    else if (analogRead(potPin2)) {
-      Dynamix.setPosition(JOINT_1, sendjointP1, WRITE);
-    while((sendjointP1+10)<Dynamix.getPosition(JOINT_1)){
-             delay(6);
-        }
-    }
-    else{
-      Dynamix.clearSerialBuffer(); 
-       }
-   
-
-   
-
-
-    
-  }
-  else if (menu == 1)
-  {
-    int32_t joint2 = Dynamix.getPosition(JOINT_2);
-    int32_t sendjointN2 = joint2 - 40;
-    int32_t sendjointP2 = joint2 + 40;
-    delay(6);
-    if (digitalRead(10)) {
-      Dynamix.setPosition(JOINT_2, sendjointN2, WRITE);
-      delay(90);
-    }
-    else if (digitalRead(11)) {
-      Dynamix.setPosition(JOINT_2, sendjointP2, WRITE);
-      delay(90);
-    }
-  }
-  else if (menu == 2)
-  {
-    int32_t joint3 = Dynamix.getPosition(JOINT_3);
-    int32_t sendjointN3 = joint3 - 40;
-    int32_t sendjointP3 = joint3 + 40;
-    delay(6);
-    if (digitalRead(10)) {
-      Dynamix.setPosition(JOINT_3, sendjointN3, WRITE);
-      delay(90);
-    }
-    else if (digitalRead(11)) {
-      Dynamix.setPosition(JOINT_3, sendjointP3, WRITE);
-      delay(90);
-    }
-  }
-  else if (menu == 3)
-  {
-    int32_t gripper = Dynamix.getPosition(GRIPPER_LEFT);
-    int32_t gripperN = gripper - 30;
-    int32_t gripperP = gripper + 30;
-    delay(6);
-    if (digitalRead(10)) {
-      Dynamix.setPosition(GRIPPER_BOTH, gripperP, WRITE); // gripper opens
-      delay(6);
-      Serial.println(gripper);
-    }
-    else if (digitalRead(11)) {
-      Dynamix.setPosition(GRIPPER_BOTH, gripperN, WRITE); // gripper closes
-      delay(6);
-    }
-    
-  }
-  */
 int Emg(int16_t signal)
 {
   if(signal > 1024){
@@ -544,12 +466,12 @@ void loop() {
       updateMenu();
 
     
-    while (XbeeMeter(xbee.getAccY())==1){
+    //while (XbeeMeter(xbee.getAccY())==1){
 
-      delay(1);
-      Serial.println("in the while loop");
+      delay(1000);
+      //Serial.println("in the while loop");
      
-      }
+     // }
     }
     
     if (XbeeMeter(xbee.getAccY())==-1) { // resting is around 560
@@ -563,12 +485,12 @@ void loop() {
 
       delay(2);
 
-      while (XbeeMeter(xbee.getAccY())==-1){
+     // while (XbeeMeter(xbee.getAccY())==-1){
 
-      delay(1);
-      Serial.println("in the while loop -1");
+      delay(1000);
+     // Serial.println("in the while loop -1");
      
-      }
+     // }
       
     }
     if (!digitalRead(selectButton)) { // resting is around 0
@@ -580,7 +502,7 @@ void loop() {
 
    
 
-    xbee.updateData();
+    //xbee.updateData();
     PrimeMover(menu,Emg(xbee.getEMG_CH1()));
 
     while (millis() - old_time < hertz);

@@ -50,7 +50,7 @@ public:
     void setStatusReturnLevel(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setMaxPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
     void setMinPosition(unsigned char MOTOR_ID, unsigned short setVal, unsigned char setIntruction);
-    
+    double Dynamixelclass::getVelocityRadians(unsigned char MOTOR_ID);
     void inverseKinematics(double x, double y, double z);
     void forwardKinematics(int32_t JOINT_1, int32_t JOINT_2, int32_t JOINT_3, int savePointNo);
 

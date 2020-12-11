@@ -27,8 +27,8 @@ int32_t OUTemgCH1;
 int32_t oldOUTemgCH1 = 0;
 int32_t OUTemgCH2;
 int32_t oldOUTemgCH2 = 0;
-int weight = 50;
-#define EMG_Y 1
+int weight = 1;
+#define ACC_Y 1
 #define EMG_CH1 2
 #define EMG_CH2 3
 
@@ -419,7 +419,7 @@ int32_t expoentialFilter(int type){
     Serial.print("old y: ");
     Serial.println(oldOUTemgY);
   delay(1);
-  if (type = EMG_Y){
+  if (type = ACC_Y){
     OUTemgY = (weight * xbee.getAccY()) + ((1-weight) * oldOUTemgY);
     oldOUTemgY = OUTemgY;
         Serial.print("new y: ");
@@ -512,6 +512,29 @@ int Emg(int16_t signal)
 }
 
 
+double tracvia(double theta0, double thetag, double thetav, double tf, double t){
+    
+    double a10=theta0;
+    double a11=0;
+    double a12=((12*thetav)-(3*thetag)-(9*theta0))/(4*(tf*tf));
+    double a13=((-8*thetav)+(3*thetag)+(5*theta0))/(4*(tf*tf*tf));
+    
+    double th1=a12*(t*t)+a13*(t*t*t);
+    
+ 
+    double a20=thetav;
+    
+    double a21=((3*thetag)-(3*theta0))/(4*(tf));
+    double a22=((-12*thetav)+(6*thetag)+(6*theta0))/(4*(tf*tf));
+    double a23=((8*thetav)-(5*thetag)-(3*theta0))/(4*(tf*tf*tf));
+    
+    
+double thetas=a10+a12*(t*t)+a13*(t*t*t);
+double thetaf=a20+a21*t+a22*(t*t)+a23*(t*t*t);    
+}
+
+
+
 void loop() {
   while (!Serial2) {}
   startup();
@@ -522,7 +545,7 @@ void loop() {
     old_time = millis();
     xbee.updateData();
 
-    if (XbeeMeter(expoentialFilter(EMG_Y))==1) { // resting is around 560
+    if (XbeeMeter(expoentialFilter(ACC_Y))==1) { // resting is around 560
     
       menu++;
       y++;
@@ -541,7 +564,7 @@ void loop() {
      // }
     }
     
-    if (XbeeMeter(expoentialFilter(EMG_Y))==-1) { // resting is around 560
+    if (XbeeMeter(expoentialFilter(ACC_Y))==-1) { // resting is around 560
       menu--;
       y--;
       if (menu < 0) {
@@ -552,22 +575,30 @@ void loop() {
 
       delay(2);
 
-     // while (XbeeMeter(xbee.getAccY())==-1){
 
       delay(1000);
-     // Serial.println("in the while loop -1");
      
-     // }
+      if (XbeeMeter(expoentialFilter(EMG_CH1))==-1) { // resting is around 0
+    
+
+     Dynamix.setPosition(JOINT_1,887,REQ_WRITE);
+     Dynamix.setPosition(JOINT_2,-1664,REQ_WRITE);
+     Dynamix.setPosition(JOINT_3,2779,REQ_WRITE);
+
+  delay(2);
+  Dynamix.setAction(0xFE);
       
-    }
-    if (!digitalRead(selectButton)) { // resting is around 0
       execute();
       ///updateMenu();
       delay(2);
-      while (!digitalRead(selectButton));
-    }
 
-   
+
+    }
+    }
+  
+
+  
+      
 
     PrimeMover(menu,Emg(xbee.getEMG_CH1()));
 

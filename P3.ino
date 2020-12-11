@@ -19,6 +19,19 @@ const uint32_t activeTimeFrequency = 1000;
 double activeTimeCooldown = 0;
 volatile byte EMG_state = 0;
 
+
+////////////////////////
+int32_t OUTemgY;
+int32_t oldOUTemgY = 0;
+int32_t OUTemgCH1;
+int32_t oldOUTemgCH1 = 0;
+int32_t OUTemgCH2;
+int32_t oldOUTemgCH2 = 0;
+int weight = 50;
+#define EMG_Y 1
+#define EMG_CH1 2
+#define EMG_CH2 3
+
 #define LCD_CS A3
 #define LCD_CD A2
 #define LCD_WR A1
@@ -400,27 +413,33 @@ int XbeeBuffer(int input){
 
 }
 
-void EMG(){
+
+int32_t expoentialFilter(int type){
   xbee.updateData();
-  checkEmgInput();
-}
-
-void checkEmgInput() {
-  uint32_t input[3] = {xbee.getAccY(), xbee.getEMG_CH1(), xbee.getEMG_CH2()}; // Gets the values from the accelerometer and EMG value
-  static byte filt_index = 0; // Is used to index the filter array to store the input values
-  filt_index++; // Increments to index next filter element
-  filt_index = (filt_index < filter_size ? filt_index : 0); // Gets reset if the filt_index has exceeded the number of elements in the filter array
-
-  for(byte i = 0; i < 3; i++) // Resets if the input is above the maximum value (this has fixed an important bug, don't touch!)
-    input[i] = (input[i] < 1023 ? input[i] : 0);
-
-  for(byte i = 0; i < 3; i++){ // Saves the inputs in the filter array and calculates the new means
-    filt_value[i] = filt_value[i] + input[i] - filter[i][filt_index]; // Removes the oldest data and inserts the new into filt_value. Filt_value holds all values from the filter
-    filter[i][filt_index] = input[i]; // Saves the new data
-    
-    mean[i] = filt_value[i] / filter_size; // Mean is calculated
+    Serial.print("old y: ");
+    Serial.println(oldOUTemgY);
+  delay(1);
+  if (type = EMG_Y){
+    OUTemgY = (weight * xbee.getAccY()) + ((1-weight) * oldOUTemgY);
+    oldOUTemgY = OUTemgY;
+        Serial.print("new y: ");
+    Serial.println(OUTemgY);
+    return OUTemgY;
+  }
+  
+  if (type = EMG_CH1){
+    OUTemgCH1 = (weight * xbee.getEMG_CH1()) +((1-weight) * oldOUTemgCH1);
+    oldOUTemgCH1 = OUTemgCH1;
+    return OUTemgCH1;
+  }
+  
+  if (type = EMG_CH2){
+    OUTemgCH2 = weight * xbee.getEMG_CH2() + (1-weight) * oldOUTemgCH2;
+    oldOUTemgCH2 = OUTemgCH2;
+    return OUTemgCH2;
   }
 }
+
 
 void PrimeMover(int a, int state){
   const char Limb[4]={JOINT_1,JOINT_2, JOINT_3};
@@ -428,10 +447,9 @@ void PrimeMover(int a, int state){
     int32_t sendjointN = joint - 40;
     int32_t sendjointP = joint + 40;
     delay(6);
-    //EMG();
-    int32_t val1 = mean[1];    // calculate the moving average
-    val2 = xbee.getEMG_CH2();
-    Serial.println(mean[1]);
+    int32_t val1 = expoentialFilter(EMG_CH1);    // calculate the moving average
+    val2 = expoentialFilter(EMG_CH2);
+    //Serial.println(val1);
 
     if (val1 > 250) {
       if (a == 0 || a == 1 || a == 2){
@@ -440,7 +458,7 @@ void PrimeMover(int a, int state){
       delay(6);
       Dynamix.setPosition(Limb[a], sendjointN, WRITE);
       delay(6);
-      val1 = xbee.getEMG_CH1();
+      val1 = expoentialFilter(EMG_CH1);
       }
       else if (a == 3)
       {
@@ -449,7 +467,7 @@ void PrimeMover(int a, int state){
       delay(6);
       Dynamix.setPosition(GRIPPER_BOTH, sendjointN, WRITE);
       delay(6);
-      val1 = xbee.getEMG_CH1();
+      val1 = expoentialFilter(EMG_CH1);
       }
     }
 
@@ -461,7 +479,7 @@ void PrimeMover(int a, int state){
       Dynamix.setPosition(Limb[a], sendjointP, WRITE);
       delay(6);
       ///////////xbee.updateData();
-      val1 = xbee.getEMG_CH1();
+      val2 = expoentialFilter(EMG_CH2);
       //int32_t jointx = Dynamix.getPosition(Limb[a]); 
       //Dynamix.setPosition(Limb[a], sendjointP, WRITE);
     /*while((sendjointP+10)<Dynamix.getPosition(Limb[a])){
@@ -502,9 +520,10 @@ void loop() {
 
   while (true) {
     old_time = millis();
-    EMG();
+    xbee.updateData();
 
-    if (XbeeMeter(xbee.getAccY())==1) { // resting is around 560
+    if (XbeeMeter(expoentialFilter(EMG_Y))==1) { // resting is around 560
+    
       menu++;
       y++;
       if (menu > 4) {
@@ -522,7 +541,7 @@ void loop() {
      // }
     }
     
-    if (XbeeMeter(xbee.getAccY())==-1) { // resting is around 560
+    if (XbeeMeter(expoentialFilter(EMG_Y))==-1) { // resting is around 560
       menu--;
       y--;
       if (menu < 0) {
@@ -550,7 +569,6 @@ void loop() {
 
    
 
-    //xbee.updateData();
     PrimeMover(menu,Emg(xbee.getEMG_CH1()));
 
     //while (millis() - old_time < hertz);

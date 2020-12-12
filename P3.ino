@@ -347,11 +347,13 @@ void execute() {  //the "select" function
       if (MainMenu == true) {
         PrintSubMenu();
         MainMenu = false;
+        printPointer();
       }
       else {
         tft.fillScreen(BLACK);
         PrintMainMenu();
         MainMenu = true;
+        printPointer();
       }
       break;
   }

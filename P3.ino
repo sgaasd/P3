@@ -2,32 +2,15 @@
 #include "src/libs/IntervalTimer/IntervalTimer.h"
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
 #include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
-#include "src/libs/movingAvg/movingAvg.h"
 
-movingAvg avg(5);
-
-// dette er til test af emg mean
-const byte filter_size = 10;
-const uint32_t input_thres[3] = {490, 50, 50};
-uint32_t filter[3][filter_size] = {0};
-int32_t filt_value[3] = {0};
-uint32_t mean[3] = {0};
-double activeTime[2] = {0};
-bool activeEMG[2] = {0};
-const uint32_t activeTimeThresh = 50; //ms
-const uint32_t activeTimeFrequency = 1000;
-double activeTimeCooldown = 0;
-volatile byte EMG_state = 0;
-
-
-////////////////////////
+//////////////////////// Exponetial filter //////////////7
 int32_t OUTemgY;
 int32_t oldOUTemgY = 0;
 int32_t OUTemgCH1;
 int32_t oldOUTemgCH1 = 0;
 int32_t OUTemgCH2;
 int32_t oldOUTemgCH2 = 0;
-int weight = 1;
+int weight = 0.8;
 #define ACC_Y 1
 #define EMG_CH1 2
 #define EMG_CH2 3
@@ -59,15 +42,10 @@ int weight = 1;
 
 #define DIRECTION_PIN 13
 
-
 EMGclass xbee;
 Dynamixelclass Dynamix;
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 
-// controlling buttons
-int upButton = 52;
-int downButton = 53;
-int selectButton = 51;
 int menu = 0; //menu value for switch
 int y = 0;    // variable y koordinate for pointer (arrow)
 bool MainMenu = true; // to check which menu the user is in
@@ -81,15 +59,11 @@ int sensorMax = 0; // same as above
 int sensorValue = 0; // accelerometer input
 int PointerY[5] = {35, 70, 105, 140, 170}; // array with y coordinates for pointer
 int gripperPos = 0; // 0=open, 1=closed
-int potPin1 = A15; //potentiometer på kanal 1
-int potPin2 = A14; //potentiometer på kanal 2
-int val1 = 0;
-int val2 = 0;
+
+int32_t val1 = 0;
+int32_t val2 = 0;
 
 void setup() {
-  avg.begin();
-  pinMode(10, INPUT);
-  pinMode(11, INPUT);
   Serial.begin(9600);
   xbee.begin(Serial1, 115200);
   Dynamix.begin(Serial2, 57600, DIRECTION_PIN);
@@ -169,8 +143,8 @@ void setup() {
   Dynamix.setVelocityProfile(GRIPPER_RIGHT, 100, WRITE);
 
   Dynamix.setPosition(JOINT_1, 2047, REQ_WRITE);
-  //Dynamix.setPosition(JOINT_2, 3073, REQ_WRITE);
-  Dynamix.setPosition(JOINT_2, 2500, REQ_WRITE);// brugt til test - skal slettes
+  Dynamix.setPosition(JOINT_2, 3073, REQ_WRITE);
+  //Dynamix.setPosition(JOINT_2, 2500, REQ_WRITE);// brugt til test - skal slettes
   Dynamix.setPosition(JOINT_3, 2047, REQ_WRITE);
   Dynamix.setPosition(GRIPPER_BOTH, 2047, REQ_WRITE);
   delay(2);
@@ -179,12 +153,8 @@ void setup() {
 
   tft.reset(); // reset the display
   tft.begin(0x9341); // start communication with the display on given address
-  pinMode(upButton, INPUT_PULLUP); // buttons for menu control
-  pinMode(downButton, INPUT_PULLUP);
-  pinMode(selectButton, INPUT_PULLUP);
   tft.fillScreen(BLACK); //fill whole screen with color black (not required, but then the screen will flash with grey colors)
   updateMenu(); // updating the switch menu state
-
 }
 //Print main menu
 void PrintMainMenu() {
@@ -386,6 +356,7 @@ void execute() {  //the "select" function
       break;
   }
 }
+// Function for converting EMG signal into boolean
 int XbeeMeter(double currentstate){
   xbee.updateData();
   if(currentstate>650){
@@ -401,114 +372,104 @@ int XbeeMeter(double currentstate){
   }
 
 }
-int XbeeBuffer(int input){
-  int arr[30];
-  for (int i = 0; i< 30; i++) {
-  arr[i] = input;
-  //Serial.print("string");
- //Serial.println(arr[i]);
-      
-  }
 
-
-}
-
-
-int32_t expoentialFilter(int type){
+int32_t expoentialFilter(int type)
+{
   xbee.updateData();
-    Serial.print("old y: ");
-    Serial.println(oldOUTemgY);
   delay(1);
-  if (type = ACC_Y){
-    OUTemgY = (weight * xbee.getAccY()) + ((1-weight) * oldOUTemgY);
+  if (type == EMG_Y)
+  {
+    OUTemgY = (weight * xbee.getAccY()) + ((1 - weight) * oldOUTemgY);
     oldOUTemgY = OUTemgY;
-        Serial.print("new y: ");
-    Serial.println(OUTemgY);
     return OUTemgY;
   }
-  
-  if (type = EMG_CH1){
-    OUTemgCH1 = (weight * xbee.getEMG_CH1()) +((1-weight) * oldOUTemgCH1);
+
+  else if (type == EMG_CH1)
+  {
+    //Serial.print("old ch1: ");
+    //Serial.println(oldOUTemgCH1);
+    OUTemgCH1 = (weight * xbee.getEMG_CH1()) + ((1 - weight) * oldOUTemgCH1);
     oldOUTemgCH1 = OUTemgCH1;
+    //Serial.print("new ch1: ");
+    //Serial.println(OUTemgCH1);
     return OUTemgCH1;
   }
-  
-  if (type = EMG_CH2){
-    OUTemgCH2 = weight * xbee.getEMG_CH2() + (1-weight) * oldOUTemgCH2;
+
+  else if (type == EMG_CH2)
+  {
+    OUTemgCH2 = weight * xbee.getEMG_CH2() + (1 - weight) * oldOUTemgCH2;
     oldOUTemgCH2 = OUTemgCH2;
+    Serial.print("new ch2: ");
+    Serial.println(OUTemgCH2);
+    return OUTemgCH1;
     return OUTemgCH2;
   }
 }
 
-
-void PrimeMover(int a, int state){
-  const char Limb[4]={JOINT_1,JOINT_2, JOINT_3};
+void PrimeMover(int a)
+{
+  const char Limb[4] = {JOINT_1, JOINT_2, JOINT_3};
   int32_t joint = Dynamix.getPosition(Limb[a]);
-    int32_t sendjointN = joint - 40;
-    int32_t sendjointP = joint + 40;
-    delay(6);
-    int32_t val1 = expoentialFilter(EMG_CH1);    // calculate the moving average
-    val2 = expoentialFilter(EMG_CH2);
-    //Serial.println(val1);
+  int32_t sendjointN = joint - 40;
+  int32_t sendjointP = joint + 40;
+  delay(6);
+  // val1 = expoentialFilter(EMG_CH1); // calculate the exponetial filter value
+  // val2 = expoentialFilter(EMG_CH2); // calculate the exponetial filter value
+  val1 = xbee.getEMG_CH1(); //xbee.getEMG_CH1();
+  val2 = xbee.getEMG_CH2(); //xbee.getEMG_CH2();
+                            //Serial.print("ch1: ");
+  //Serial.println(val1);
+  //Serial.print("ch2: ");
+  //Serial.println(val2);
 
-    if (val1 > 250) {
-      if (a == 0 || a == 1 || a == 2){
+  if (val1 > 200)
+  {
+    if (a == 0 || a == 1 || a == 2)
+    {
       joint = Dynamix.getPosition(Limb[a]);
       sendjointN = joint - 40;
       delay(6);
       Dynamix.setPosition(Limb[a], sendjointN, WRITE);
       delay(6);
       val1 = expoentialFilter(EMG_CH1);
-      }
-      else if (a == 3)
-      {
+    }
+    else if (a == 3)
+    {
       joint = Dynamix.getPosition(GRIPPER_LEFT);
       sendjointN = joint - 40;
       delay(6);
       Dynamix.setPosition(GRIPPER_BOTH, sendjointN, WRITE);
       delay(6);
       val1 = expoentialFilter(EMG_CH1);
-      }
     }
+  }
 
-    else if (val2 > 500000) {
-      //Serial.println(val1);
+  else if (val2 > 300)
+  {
+    if (a == 0 || a == 1 || a == 2)
+    {
       joint = Dynamix.getPosition(Limb[a]);
-      sendjointN = joint - 40;
+      sendjointP = joint + 40;
       delay(6);
       Dynamix.setPosition(Limb[a], sendjointP, WRITE);
       delay(6);
-      ///////////xbee.updateData();
       val2 = expoentialFilter(EMG_CH2);
-      //int32_t jointx = Dynamix.getPosition(Limb[a]); 
-      //Dynamix.setPosition(Limb[a], sendjointP, WRITE);
-    /*while((sendjointP+10)<Dynamix.getPosition(Limb[a])){
-             delay(6);
-        }*/
     }
-    else{
-      Dynamix.clearSerialBuffer(); 
-       }
-
-
-
-}
-
-int Emg(int16_t signal)
-{
-  if(signal > 1024){
-    return 0;
-  } 
-
-  if(signal>200){
-    return 1;
+    else if (a == 3)
+    {
+      joint = Dynamix.getPosition(GRIPPER_LEFT);
+      sendjointN = joint + 40;
+      delay(6);
+      Dynamix.setPosition(GRIPPER_BOTH, sendjointP, WRITE);
+      delay(6);
+      val2 = expoentialFilter(EMG_CH2);
+    }
   }
 
-  if(signal<50){
-    return 0;
+  else
+  {
+    Dynamix.clearSerialBuffer();
   }
-
-
 }
 
 
@@ -540,67 +501,66 @@ void loop() {
   startup();
   float hertz = 1000 / 1000;
   long old_time;
+    int starttime;
 
-  while (true) {
+  while (true)
+  {
     old_time = millis();
     xbee.updateData();
 
-    if (XbeeMeter(expoentialFilter(ACC_Y))==1) { // resting is around 560
-    
+    if (XbeeMeter(xbee.getAccY()) == 1)
+    {
       menu++;
       y++;
-      if (menu > 4) {
+      if (menu > 4)
+      {
         menu = 0;
         y = 0;
       }
       updateMenu();
 
-    
-    //while (XbeeMeter(xbee.getAccY())==1){
-
+      starttime = millis();
       delay(1000);
-      //Serial.println("in the while loop");
-     
-     // }
+      //  while (XbeeMeter(xbee.getAccY())==1){
+      //    if (millis() > starttime + 2000)
+      //    {
+      //      break;
+      //    }
+
+      //  }
     }
-    
-    if (XbeeMeter(expoentialFilter(ACC_Y))==-1) { // resting is around 560
+
+    if (XbeeMeter(xbee.getAccY()) == -1)
+    { // resting is around 560
       menu--;
       y--;
-      if (menu < 0) {
+      if (menu < 0)
+      {
         menu = 4;
         y = 4;
       }
       updateMenu();
 
       delay(2);
-
-
+      starttime = millis();
       delay(1000);
-     
-      if (XbeeMeter(expoentialFilter(EMG_CH1))==-1) { // resting is around 0
-    
-
-     Dynamix.setPosition(JOINT_1,887,REQ_WRITE);
-     Dynamix.setPosition(JOINT_2,-1664,REQ_WRITE);
-     Dynamix.setPosition(JOINT_3,2779,REQ_WRITE);
-
-  delay(2);
-  Dynamix.setAction(0xFE);
-      
-      execute();
-      ///updateMenu();
-      delay(2);
-
-
+      //   while (XbeeMeter(xbee.getAccY())==-1){
+      //    if (millis() > starttime + 2000)
+      //    {
+      //      break;
+      //    }
+      //  }
     }
+    if (menu == 4)
+    {
+      if (expoentialFilter(EMG_CH1) > 200)
+      {
+        execute();
+        ///updateMenu();
+        delay(2);
+      }
     }
-  
-
-  
-      
-
-    PrimeMover(menu,Emg(xbee.getEMG_CH1()));
+    PrimeMover(menu);
 
     //while (millis() - old_time < hertz);
   }

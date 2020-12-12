@@ -69,7 +69,6 @@ int32_t arrPoint2[3];
 int32_t arrPoint3[3];
 int32_t arrPoint4[3];
 
-
 void setup()
 {
   Serial.begin(9600);
@@ -161,7 +160,7 @@ void setup()
   tft.fillScreen(BLACK); //fill whole screen with color black (not required, but then the screen will flash with grey colors)
   updateMenu();          // updating the switch menu state
 }
-//Print main menu
+//Print main menu . Only text here
 void PrintMainMenu()
 {
   tft.setTextColor(WHITE);
@@ -177,7 +176,7 @@ void PrintMainMenu()
   tft.setCursor(70, 175);
   tft.print(" Points ");
 }
-//Print sub menu
+//Print sub menu, but validate the pointStates first and color them with corresponding color
 void PrintSubMenu()
 {
   if (Point1State == true)
@@ -268,13 +267,13 @@ void startup()
   }
 }
 
-// Function that refreshes the column with the pointer, and prints the pointer at the new place after each iteration 
+// Function that refreshes the column with the pointer, and prints the pointer at the new place after each iteration
 void updateMenu()
 {
   if (MainMenu == true)
-  { // prints the main menu IF the user IS in the main menu
+  { 
     PrintMainMenu();
-  };
+  }
   switch (menu)
   {
   case 0:
@@ -296,65 +295,36 @@ void updateMenu()
   case 4:
     tft.fillRect(40, 0, 33, 240, BLACK);
     printPointer();
-
     break;
   }
 }
-// execute function that checks if the user is in the sub menu, where it will change the point state from false to true for each 
+// execute function that checks if the user is in the sub menu, where it will change the point state from false to true for each
 //corresponding case, and prints (updates) the submenu again
 void execute()
-{ 
+{
   switch (menu)
   {
+  if (MainMenu == false){
   case 0:
-    if (MainMenu == false)
-    { 
-
-      if (Point1State == false)
-      { 
-      
-        Point1State = true;
-        PrintSubMenu();
-      }
-      
-    }
+      Point1State = true;
+      PrintSubMenu();
     break;
   case 1:
-    if (MainMenu == false)
-    {
-
-      if (Point2State == false)
-      {
-        
-        Point2State = true;
-        PrintSubMenu();
-      }
-    }
+      Point2State = true;
+      PrintSubMenu();
     break;
 
   case 2:
-    if (MainMenu == false)
-    {
-
-      if (Point3State == false)
-      {
-        Point3State = true;
-        PrintSubMenu();
-      }
-    }
+      Point3State = true;
+      PrintSubMenu();
     break;
 
   case 3:
-    if (MainMenu == false)
-    {
-
-      if (Point4State == false)
-      {
-        Point4State = true;
-        PrintSubMenu();
-      }
-    }
+      Point4State = true;
+      PrintSubMenu();
     break;
+  }
+
   case 4:
     tft.fillScreen(BLACK);
     if (MainMenu == true)
@@ -373,7 +343,7 @@ void execute()
     break;
   }
 }
-// Each case waits for the input from either EMG channel 1 or channel 2, where the former will get the position of each 
+// Each case waits for the input from either EMG channel 1 or channel 2, where the former will get the position of each
 //dynamixel motor and then insert that data in corresponding array, while the latter will read data from aforementioned arrays
 // and send data as position commands to the dynamixel motors
 void runPoint()
@@ -395,14 +365,13 @@ void runPoint()
         Serial.print(arrPoint1[i]);
         Serial.print(" ");
       }
-       Serial.println();
-    
+      Serial.println();
     }
     else if (xbee.getEMG_CH2() > 200)
     {
-      Dynamix.setPosition(JOINT_1,arrPoint1[0], REQ_WRITE);
-      Dynamix.setPosition(JOINT_2,arrPoint1[1], REQ_WRITE);
-      Dynamix.setPosition(JOINT_3,arrPoint1[2], REQ_WRITE);
+      Dynamix.setPosition(JOINT_1, arrPoint1[0], REQ_WRITE);
+      Dynamix.setPosition(JOINT_2, arrPoint1[1], REQ_WRITE);
+      Dynamix.setPosition(JOINT_3, arrPoint1[2], REQ_WRITE);
       Dynamix.setAction(0xfe);
     }
     break;
@@ -418,9 +387,9 @@ void runPoint()
     }
     else if (xbee.getEMG_CH2() > 200)
     {
-      Dynamix.setPosition(JOINT_1,arrPoint2[0], REQ_WRITE);
-      Dynamix.setPosition(JOINT_2,arrPoint2[1], REQ_WRITE);
-      Dynamix.setPosition(JOINT_3,arrPoint2[2], REQ_WRITE);
+      Dynamix.setPosition(JOINT_1, arrPoint2[0], REQ_WRITE);
+      Dynamix.setPosition(JOINT_2, arrPoint2[1], REQ_WRITE);
+      Dynamix.setPosition(JOINT_3, arrPoint2[2], REQ_WRITE);
       Dynamix.setAction(0xfe);
     }
     break;
@@ -436,51 +405,54 @@ void runPoint()
     }
     else if (xbee.getEMG_CH2() > 200)
     {
-      Dynamix.setPosition(JOINT_1,arrPoint3[0], REQ_WRITE);
-      Dynamix.setPosition(JOINT_2,arrPoint3[1], REQ_WRITE);
-      Dynamix.setPosition(JOINT_3,arrPoint3[2], REQ_WRITE);
+      Dynamix.setPosition(JOINT_1, arrPoint3[0], REQ_WRITE);
+      Dynamix.setPosition(JOINT_2, arrPoint3[1], REQ_WRITE);
+      Dynamix.setPosition(JOINT_3, arrPoint3[2], REQ_WRITE);
       Dynamix.setAction(0xfe);
     }
 
     break;
 
-case 3:
-  if (xbee.getEMG_CH1() > 200)
-  {
+  case 3:
+    if (xbee.getEMG_CH1() > 200)
+    {
       arrPoint4[0] = Dynamix.getPosition(JOINT_1);
       delay(6);
       arrPoint4[1] = Dynamix.getPosition(JOINT_2);
       delay(6);
       arrPoint4[2] = Dynamix.getPosition(JOINT_3);
-  }
-  else if (xbee.getEMG_CH2() > 200)
-  {
-    Dynamix.setPosition(JOINT_1,arrPoint4[0], REQ_WRITE);
-    Dynamix.setPosition(JOINT_2,arrPoint4[1], REQ_WRITE);
-    Dynamix.setPosition(JOINT_3,arrPoint4[2], REQ_WRITE);
-    Dynamix.setAction(0xfe);
-  }
-  break;
-  default:
-  break;
-}
+    }
+    else if (xbee.getEMG_CH2() > 200)
+    {
+      Dynamix.setPosition(JOINT_1, arrPoint4[0], REQ_WRITE);
+      Dynamix.setPosition(JOINT_2, arrPoint4[1], REQ_WRITE);
+      Dynamix.setPosition(JOINT_3, arrPoint4[2], REQ_WRITE);
+      Dynamix.setAction(0xfe);
+    }
+    break;
 
+  default:
+    break;
+  }
 }
 // Function for converting EMG signal into boolean
-int XbeeMeter(double currentstate){
+int XbeeMeter(double currentstate)
+{
   xbee.updateData();
-  if(currentstate>650){
+  if (currentstate > 650)
+  {
     return 1;
   }
 
-  if(currentstate<320){
+  if (currentstate < 320)
+  {
     return -1;
   }
 
-  else{
+  else
+  {
     return 0;
   }
-
 }
 
 int32_t expoentialFilter(int type)
@@ -582,36 +554,35 @@ void PrimeMover(int a)
   }
 }
 
+double tracvia(double theta0, double thetag, double thetav, double tf, double t)
+{
 
-double tracvia(double theta0, double thetag, double thetav, double tf, double t){
-    
-    double a10=theta0;
-    double a11=0;
-    double a12=((12*thetav)-(3*thetag)-(9*theta0))/(4*(tf*tf));
-    double a13=((-8*thetav)+(3*thetag)+(5*theta0))/(4*(tf*tf*tf));
-    
-    double th1=a12*(t*t)+a13*(t*t*t);
-    
- 
-    double a20=thetav;
-    
-    double a21=((3*thetag)-(3*theta0))/(4*(tf));
-    double a22=((-12*thetav)+(6*thetag)+(6*theta0))/(4*(tf*tf));
-    double a23=((8*thetav)-(5*thetag)-(3*theta0))/(4*(tf*tf*tf));
-    
-    
-double thetas=a10+a12*(t*t)+a13*(t*t*t);
-double thetaf=a20+a21*t+a22*(t*t)+a23*(t*t*t);    
+  double a10 = theta0;
+  double a11 = 0;
+  double a12 = ((12 * thetav) - (3 * thetag) - (9 * theta0)) / (4 * (tf * tf));
+  double a13 = ((-8 * thetav) + (3 * thetag) + (5 * theta0)) / (4 * (tf * tf * tf));
+
+  double th1 = a12 * (t * t) + a13 * (t * t * t);
+
+  double a20 = thetav;
+
+  double a21 = ((3 * thetag) - (3 * theta0)) / (4 * (tf));
+  double a22 = ((-12 * thetav) + (6 * thetag) + (6 * theta0)) / (4 * (tf * tf));
+  double a23 = ((8 * thetav) - (5 * thetag) - (3 * theta0)) / (4 * (tf * tf * tf));
+
+  double thetas = a10 + a12 * (t * t) + a13 * (t * t * t);
+  double thetaf = a20 + a21 * t + a22 * (t * t) + a23 * (t * t * t);
 }
 
-
-
-void loop() {
-  while (!Serial2) {}
+void loop()
+{
+  while (!Serial2)
+  {
+  }
   startup();
   float hertz = 1000 / 1000;
   long old_time;
-    int starttime;
+  int starttime;
 
   while (true)
   {
@@ -672,14 +643,14 @@ void loop() {
     }
     if (MainMenu == true)
     {
-     PrimeMover(menu);
+      PrimeMover(menu);
     }
     if (MainMenu == false)
     {
       runPoint();
     }
-    
-  Serial.println(menu);
+
+    Serial.println(menu);
     //while (millis() - old_time < hertz);
   }
 }

@@ -1,9 +1,8 @@
 #include "src/libs/EMG_Lib/EMG.h"
-#include "src/libs/IntervalTimer/IntervalTimer.h"
 #include "src/libs/Dynamixel_Lib/Dynamixel.h"
 #include "src/libs/Elegoo_TFTLCD/Elegoo_TFTLCD.h"
 
-//////////////////////// Exponetial filter //////////////7
+//////////////////////// Exponetial filter //////////////
 int32_t OUTemgY;
 int32_t oldOUTemgY = 0;
 int32_t OUTemgCH1;
@@ -15,12 +14,12 @@ int weight = 0.8;
 #define EMG_CH1 2
 #define EMG_CH2 3
 
+//////////////////////// TFT display//////////////
 #define LCD_CS A3
 #define LCD_CD A2
 #define LCD_WR A1
 #define LCD_RD A0
 #define LCD_RESET A4
-//Det er fordi jeg elskser alle farver...
 #define BLACK 0x0000
 #define BLUE 0x001F
 #define RED 0xF800
@@ -30,16 +29,17 @@ int weight = 0.8;
 #define YELLOW 0xFFE0
 #define WHITE 0xFFFF
 
+//////////////////////// Dynamixel hex adr //////////////
 #define JOINT_1 0x01
 #define JOINT_2 0x02
 #define JOINT_3 0x03
 #define GRIPPER_LEFT 0x04
 #define GRIPPER_RIGHT 0x05
 #define GRIPPER_BOTH 0x0A // Shadow ID 10
-
 #define WRITE 0x03
 #define REQ_WRITE 0x04
 
+// Direction pin for dynamixel 
 #define DIRECTION_PIN 13
 
 EMGclass xbee;
@@ -54,14 +54,8 @@ bool Point1State = false;
 bool Point2State = false;
 bool Point3State = false;
 bool Point4State = false;
-int sensorMin = 1023;                      // almost random number for calibration
-int sensorMax = 0;                         // same as above
-int sensorValue = 0;                       // accelerometer input
-int PointerY[5] = {35, 70, 105, 140, 170}; // array with y coordinates for pointer
-int gripperPos = 0;                        // 0=open, 1=closed
 
-int32_t val1 = 0;
-int32_t val2 = 0;
+int PointerY[5] = {35, 70, 105, 140, 170}; // array with y coordinates for pointer
 
 //arrays for pointMenu for getPos
 int32_t arrPoint1[3];
@@ -75,9 +69,7 @@ void setup()
   xbee.begin(Serial1, 115200);
   Dynamix.begin(Serial2, 57600, DIRECTION_PIN);
   delay(1000);
-  while (!Serial2)
-  {
-  }
+  while (!Serial2);
   Dynamix.setStatusReturnLevel(JOINT_1, 01, WRITE);
   Dynamix.setStatusReturnLevel(JOINT_2, 01, WRITE);
   Dynamix.setStatusReturnLevel(JOINT_3, 01, WRITE);
@@ -148,7 +140,6 @@ void setup()
 
   Dynamix.setPosition(JOINT_1, 2047, REQ_WRITE);
   Dynamix.setPosition(JOINT_2, 3073, REQ_WRITE);
-  //Dynamix.setPosition(JOINT_2, 2500, REQ_WRITE);// brugt til test - skal slettes
   Dynamix.setPosition(JOINT_3, 2047, REQ_WRITE);
   Dynamix.setPosition(GRIPPER_BOTH, 2047, REQ_WRITE);
   delay(2);
@@ -160,6 +151,7 @@ void setup()
   tft.fillScreen(BLACK); //fill whole screen with color black (not required, but then the screen will flash with grey colors)
   updateMenu();          // updating the switch menu state
 }
+
 //Print main menu . Only text here
 void PrintMainMenu()
 {
@@ -176,6 +168,7 @@ void PrintMainMenu()
   tft.setCursor(70, 175);
   tft.print(" Points ");
 }
+
 //Print sub menu, but validate the pointStates first and color them with corresponding color
 void PrintSubMenu()
 {
@@ -298,6 +291,7 @@ void updateMenu()
     break;
   }
 }
+
 // execute function that checks if the user is in the sub menu, where it will change the point state from false to true for each
 //corresponding case, and prints (updates) the submenu again
 void execute()
@@ -438,7 +432,6 @@ void runPoint()
 // Function for converting EMG signal into boolean
 int XbeeMeter(double currentstate)
 {
-  xbee.updateData();
   if (currentstate > 650)
   {
     return 1;
@@ -468,12 +461,8 @@ int32_t expoentialFilter(int type)
 
   else if (type == EMG_CH1)
   {
-    //Serial.print("old ch1: ");
-    //Serial.println(oldOUTemgCH1);
     OUTemgCH1 = (weight * xbee.getEMG_CH1()) + ((1 - weight) * oldOUTemgCH1);
     oldOUTemgCH1 = OUTemgCH1;
-    //Serial.print("new ch1: ");
-    //Serial.println(OUTemgCH1);
     return OUTemgCH1;
   }
 
@@ -481,29 +470,24 @@ int32_t expoentialFilter(int type)
   {
     OUTemgCH2 = weight * xbee.getEMG_CH2() + (1 - weight) * oldOUTemgCH2;
     oldOUTemgCH2 = OUTemgCH2;
-    Serial.print("new ch2: ");
-    Serial.println(OUTemgCH2);
-    return OUTemgCH1;
     return OUTemgCH2;
   }
 }
 
 void PrimeMover(int a)
 {
+  xbee.updateData();
   const char Limb[4] = {JOINT_1, JOINT_2, JOINT_3};
   int32_t joint = Dynamix.getPosition(Limb[a]);
   int32_t sendjointN = joint - 40;
   int32_t sendjointP = joint + 40;
+  int32_t val1 = 0;
+  int32_t val2 = 0;
   delay(6);
   // val1 = expoentialFilter(EMG_CH1); // calculate the exponetial filter value
   // val2 = expoentialFilter(EMG_CH2); // calculate the exponetial filter value
-  val1 = xbee.getEMG_CH1(); //xbee.getEMG_CH1();
-  val2 = xbee.getEMG_CH2(); //xbee.getEMG_CH2();
-                            //Serial.print("ch1: ");
-  //Serial.println(val1);
-  //Serial.print("ch2: ");
-  //Serial.println(val2);
-
+  val1 = xbee.getEMG_CH1(); 
+  val2 = xbee.getEMG_CH2(); 
   if (val1 > 200)
   {
     if (a == 0 || a == 1 || a == 2)
@@ -576,9 +560,6 @@ double tracvia(double theta0, double thetag, double thetav, double tf, double t)
 
 void loop()
 {
-  while (!Serial2)
-  {
-  }
   startup();
   float hertz = 1000 / 1000;
   long old_time;

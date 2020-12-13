@@ -1,11 +1,19 @@
-# P3
-ROB3 Group 360
+# P3 Project
+Robotics spring 2020 
+3th semester project 
 
+## Equipment 
+1. Arduino MEGA
+2. CrustCrawler Robot 3DOF
+    - Motor ID configuration 
+        * Joint 1 -> 0x01
+        * Joint 2 -> 0x02
+        * Joint 3 -> 0x03
+        * Gripper left -> 0x04
+            - Shadow ID -> 0x0A
+        * Gripper right -> 0x05
+            - Shadow ID -> 0x0A
 
-####  Læs dette Hamza ####
-
-    Jeg har en ide til hvordan vi kan komme til at læse statuspakkerne.
-    Hvis vi samler "sendPacket" og "readPacket" til en function, vil det måske virke? 
-        De behøver nemlig ikke være i hver sin, da vi altid skal sende en besked for at vi kan read en status fra dynamixel motor.
-
-        Giver det mening?
+## Steps
+1. Clone repository
+2. Verify and upload \P3\P3.ino to Arduino mega

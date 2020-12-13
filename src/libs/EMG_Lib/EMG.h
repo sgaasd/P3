@@ -2,8 +2,8 @@
 
 #include <Arduino.h>
 
-#ifndef EMG_H
-#define EMG_H
+//#ifndef EMG_H
+//#define EMG_H
 
 
 class EMGclass{
@@ -40,4 +40,4 @@ public:
 };
 
 
-#endif
+//#endif

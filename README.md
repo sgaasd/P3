@@ -6,14 +6,17 @@ Robotics spring 2020
 1. Arduino MEGA
 2. CrustCrawler Robot 3DOF
     - Motor ID configuration 
-        * Joint 1 -> 0x01
-        * Joint 2 -> 0x02
-        * Joint 3 -> 0x03
-        * Gripper left -> 0x04
+        - Joint 1 -> 0x01
+        - Joint 2 -> 0x02
+        - Joint 3 -> 0x03
+        - Gripper left -> 0x04
             - Shadow ID -> 0x0A
-        * Gripper right -> 0x05
+        - Gripper right -> 0x05
             - Shadow ID -> 0x0A
+3. AAU EMG electrodes with two channels and accelerometer
+4. TFT touch display
 
 ## Steps
 1. Clone repository
 2. Verify and upload \P3\P3.ino to Arduino mega
+3. Ready to go

@@ -630,8 +630,6 @@ void loop()
     {
       runPoint();
     }
-
-    Serial.println(menu);
     //while (millis() - old_time < hertz);
   }
 }

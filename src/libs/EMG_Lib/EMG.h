@@ -2,10 +2,6 @@
 
 #include <Arduino.h>
 
-//#ifndef EMG_H
-//#define EMG_H
-
-
 class EMGclass{
 private:
     struct 
@@ -19,9 +15,9 @@ private:
             uint16_t CH1, CH2;
         }EMG;
     }XBEE;
-uint16_t i = 0;
-    HardwareSerial *XBEEserial;
 
+    uint16_t i = 0;
+    HardwareSerial *XBEEserial;
     byte dataPkg[24] = {0x7E, 0x00, 0x14};
 
 public:
@@ -35,9 +31,4 @@ public:
     uint16_t getAccX(); //Return the acceleration in x-axis
     uint16_t getAccY(); //Return the acceleration in y-axis
     uint16_t getAccZ(); //Return the acceleration in z-axis
-
-
 };
-
-
-//#endif

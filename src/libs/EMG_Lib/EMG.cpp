@@ -25,13 +25,12 @@ void EMGclass::updateData(){ //update the value of accelerometer and emg channel
                 }
 
                 if(checkSum == 255){
-                   // rArr[9] | rArr[10] << 8 | rArr[11] << 16 | rArr[12] << 24
-                    XBEE.ACC.z = dataPkg[14] | dataPkg[13]<< 8;
+                    XBEE.ACC.z = dataPkg[14] | dataPkg[13] << 8;
                     XBEE.ACC.y = dataPkg[16] | dataPkg[15] << 8;
-                    XBEE.ACC.x = (dataPkg[17] << 8) + dataPkg[18];
+                    XBEE.ACC.x = dataPkg[18] | dataPkg[17] << 8;
 
                     XBEE.EMG.CH1 = dataPkg[20] | dataPkg[19] << 8;
-                    XBEE.EMG.CH2 = (dataPkg[21] << 8) + dataPkg[22];
+                    XBEE.EMG.CH2 = dataPkg[22] | dataPkg[21] << 8;
 				}
             }
         }

@@ -15,14 +15,11 @@ private:
     //savePoint for forward kinematics - 1-3=point1 | 4-6=point2 | 7-9=point3 | 10-12=point4
     float savePoint[12];
 
-
     double rad2deg(double rad);
     double deg2rad(double deg);
     void sendPacket(unsigned char *arr, int arrSIZE);
     unsigned char* sendNreadPacket(unsigned char *arr, int arrSIZE);
     unsigned short update_crc(unsigned char *data_blk_ptr, unsigned short data_blk_size);
-
-    
 
 public:
     void begin(HardwareSerial &Serial, uint32_t baudRate, int8_t directionPINOUT);
@@ -55,17 +52,4 @@ public:
     
     void inverseKinematics(double x, double y, double z);
     void forwardKinematics(int32_t JOINT_1, int32_t JOINT_2, int32_t JOINT_3, int savePointNo);
-
-
-
-
-
 };
-//constructor
-//Dynamixel::Dynamixel()
-//{
-//}
-//Destructor
-//Dynamixel::~Dynamixel()
-//{
-//}

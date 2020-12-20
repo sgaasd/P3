@@ -1,6 +1,7 @@
 # P3 Project
 Robotics spring 2020 
 3th semester project 
+group ROB3 360
 
 ## Equipment 
 1. Arduino MEGA
@@ -19,4 +20,5 @@ Robotics spring 2020
 ## Steps
 1. Clone repository
 2. Verify and upload \P3\P3.ino to Arduino mega
-3. Ready to go
+3. Connect power cable to Dynamixel motors and Arduino Mega
+4. Turn on the xbee device and place the electrodes on the correct spots on the face.

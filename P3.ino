@@ -349,20 +349,12 @@ void runPoint()
     if (xbee.getEMG_CH1() > 200)
     {
       arrPoint1[0] = Dynamix.getPosition(JOINT_1);
-      Dynamix.clearSerialBuffer();
+      
       delay(6);
       arrPoint1[1] = Dynamix.getPosition(JOINT_2);
-      Dynamix.clearSerialBuffer();
+      
       delay(6);
       arrPoint1[2] = Dynamix.getPosition(JOINT_3);
-      Dynamix.clearSerialBuffer();
-
-      for (int i = 0; i < 3; i++)
-      {
-        Serial.print(arrPoint1[i]);
-        Serial.print(" ");
-      }
-      Serial.println();
     }
     else if (xbee.getEMG_CH2() > 200)
     {
@@ -377,13 +369,13 @@ void runPoint()
     if (xbee.getEMG_CH1() > 200)
     {
       arrPoint2[0] = Dynamix.getPosition(JOINT_1);
-      Dynamix.clearSerialBuffer();
+
       delay(6);
       arrPoint2[1] = Dynamix.getPosition(JOINT_2);
-      Dynamix.clearSerialBuffer();
+
       delay(6);
       arrPoint2[2] = Dynamix.getPosition(JOINT_3);
-      Dynamix.clearSerialBuffer();
+
     }
     else if (xbee.getEMG_CH2() > 200)
     {
@@ -398,13 +390,13 @@ void runPoint()
     if (xbee.getEMG_CH1() > 200)
     {
       arrPoint3[0] = Dynamix.getPosition(JOINT_1);
-      Dynamix.clearSerialBuffer();
+
       delay(6);
       arrPoint3[1] = Dynamix.getPosition(JOINT_2);
-      Dynamix.clearSerialBuffer();
+
       delay(6);
       arrPoint3[2] = Dynamix.getPosition(JOINT_3);
-      Dynamix.clearSerialBuffer();
+
     }
     else if (xbee.getEMG_CH2() > 200)
     {
@@ -420,13 +412,13 @@ void runPoint()
     if (xbee.getEMG_CH1() > 200)
     {
       arrPoint4[0] = Dynamix.getPosition(JOINT_1);
-      Dynamix.clearSerialBuffer();
+
       delay(6);
       arrPoint4[1] = Dynamix.getPosition(JOINT_2);
-      Dynamix.clearSerialBuffer();
+
       delay(6);
       arrPoint4[2] = Dynamix.getPosition(JOINT_3);
-      Dynamix.clearSerialBuffer();
+
     }
     else if (xbee.getEMG_CH2() > 200)
     {
@@ -522,7 +514,7 @@ void PrimeMover(int a)
     }
   }
 
-  else if (val2 > 300)
+  else if (val2 > 200)
   {
     if (a == 0 || a == 1 || a == 2)
     {
@@ -631,7 +623,7 @@ void loop()
       {
         execute();
         //updateMenu();
-        delay(2);
+        delay(1000);
       }
     }
     if (MainMenu == true)
